@@ -44,11 +44,6 @@
 \setlength{\parindent}{0.5cm}
 \linespread{1.5}
 
-\pagestyle{fancy}
-\fancyhf{}
-\rhead{Farizano}
-\lhead{Trabajo práctico final - IngSoftII}
-\rfoot{\vspace{1cm} \thepage}
 
 \renewcommand*\contentsname{\LARGE Índice}
 
@@ -92,6 +87,7 @@ Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumn
   \item \textbf{Repite}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
 
+Además se desea llevar un registro de los alumnos graduados, es decir alumnos que haya promocionado 12avo grado.
 
 Se deben especificar las siguientes operaciones:
 
@@ -99,18 +95,13 @@ Se deben especificar las siguientes operaciones:
 
 2. \textbf{Cerrar inscripción}: la inscripción actual es cerrada correspondientemente a si cumplió o no los requisitos para promocionar de grado
 
-3. \textbf{AlumnoEsRepitente}: se desea consultar si un alumno repitió el último grado que haya cursado
+3. \textbf{Consultar repitencia}: se desea consultar si un alumno repitió el último grado que haya cursado
 
 El legajo de un alumno será compartido globalmente entre todas las escuelas que utilicen el sistema, de esta forma se registra el historial completo de un alumno desde el primer grado hasta el último.
 Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
 Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto cada estado de cada inscripción es inmutable, si un alumno repite se produce un nuevo registro con estado \textbf{Inscripto} en el mismo grado y si promociona se registra nuevamente con el estado \textbf{Promueve}.
 
 \textbf{Nota:} Esto quizás es demasiado para el enunciado, mucho puede moverse a los comentarios entre los esquemas más abajo
-
-%%[20:21, 27/01/2025] Fari: una invariante linda pero complicada sería que para cada grado g, existe g -1 donde (g - 1, promueve) pertenece a la secuencia
-%%[20:22, 27/01/2025] Fari: o que para g, todo x < g esté en la secuencia
-%%[20:23, 27/01/2025] Fari: o que no puede haber un promueve y después un repite en el mismo grado
-%%[20:23, 27/01/2025] Fari: hay opciones
 
 \section*{Designaciones}
 
@@ -123,13 +114,27 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
   \end{zed}
   
   \begin{schema}{Escuela}
-    legajos: ALUMNO \pfun \seq{GRADO \cross ESTADO}
+    legajos: ALUMNO \pfun \seq{GRADO \cross ESTADO} \\
+    graduados: \power{ALUMNO}
+  \end{schema}
+
+  \begin{schema}{RequisitoGraduadoInv}
+    Escuela
+    \where
+    \forall a \in graduados @ (last \; (legajos \; a?)).1 = 12 \land (last \; (legajos \; a?)).2 = promueve
+  \end{schema}
+
+  \begin{schema}{GraduadoTieneLegajoInv}
+    Escuela
+    \where
+    graduados \subseteq \dom{legajos}
   \end{schema}
 
   \begin{schema}{EscuelaInicial}
     Escuela
     \where
-    legajos = \emptyset
+    legajos = \emptyset \\
+    graduados = \emptyset
   \end{schema}
 
   \begin{schema}{InscribirAlumnoNuevoOk}
@@ -137,7 +142,8 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
     a? : ALUMNO
     \where
     a? \notin \dom{legajos} \\
-    legajos' = legajos \cup \{a? \mapsto \langle (1, inscripto) \rangle\}
+    legajos' = legajos \cup \{a? \mapsto \langle (1, inscripto) \rangle\} \\
+    graduados' = graduados
   \end{schema}
 
   \begin{schema}{InscribirAlumnoPromovidoOk}
@@ -147,7 +153,8 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
     a? \in \dom{legajos} \\
     (last \; (legajos \; a?)).2 = promueve \\
     1 \leq (last \; (legajos \; a?)).1 < 12 \\ 
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1 + 1, inscripto) \rangle\}
+    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1 + 1, inscripto) \rangle\} \\
+    graduados' = graduados
   \end{schema}
 
   \begin{schema}{InscribirAlumnoRepitenteOk}
@@ -157,7 +164,8 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
     a? \in \dom{legajos} \\
     (last \; (legajos \; a?)).2 = repite \\
     1 \leq (last \; (legajos \; a?)).1 \leq 12 \\ 
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, inscripto) \rangle\}
+    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, inscripto) \rangle\} \\
+    graduados' = graduados
   \end{schema}
 
   \begin{schema}{InscribirAlumnoGraduadoE}
@@ -184,15 +192,28 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
     InscribirAlumno == InscribirAlumnoOk \lor InscribirAlumnoE
   \end{zed}
 
-  \begin{schema}{CerrarInscripcionOk}
+  \begin{schema}{CerrarInscripcionNoGraduadoOk}
     \Delta Escuela \\
     a?: ALUMNO \\
     e?: ESTADO
     \where
     a? \in \dom{legajos} \\
-    e? = promueve \lor e? = repite \\
+    e? = repite \lor (e? = promueve \land (last \; (legajos \; a?)).1 < 12) \\
     (last \; (legajos \; a?)).2 = inscripto \\
     legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, e?) \rangle\}
+  \end{schema}
+
+  \begin{schema}{CerrarInscripcionGraduadoOk}
+    \Delta Escuela \\
+    a?: ALUMNO \\
+    e?: ESTADO
+    \where
+    a? \in \dom{legajos} \\
+    e? = promueve \\
+    (last \; (legajos \; a?)).1 = 12 \\
+    (last \; (legajos \; a?)).2 = inscripto \\
+    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, e?) \rangle\} \\
+    graduados' = graduados \cup \{ a? \}
   \end{schema}
 
   \begin{schema}{CerrarInscripcionEstadoInvalidoE}
@@ -211,6 +232,7 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
 
   \begin{zed}
     CerrarInscripcionE == CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
+    CerarrInscripcionOk == CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk \\
     CerrarInscripcion == CerrarInscripcionOk \lor CerrarInscripcionE
   \end{zed}
 
