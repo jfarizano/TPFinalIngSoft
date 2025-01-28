@@ -1,0 +1,16 @@
+*.bin
+*.aux
+*.synctex
+*.fdb_latexmk
+*.synctex.gz
+*.fls
+*.log
+*.blg
+*.bbl
+*.out
+*.dvi
+*.xdv
+*-converted-to.*
+*.out
+*.o
+czt.sty
