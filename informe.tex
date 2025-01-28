@@ -87,15 +87,15 @@ Queremos especificar el funcionamiento de un sistema que utilizan directivos de 
 Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno cuenta con un legajo donde cada entrada una representa un paso del alumno por el sistema educativo; cada registro describe el grado en que el alumno fue inscripto y tiene tres estados posibles:
 
 \begin{itemize}
-  \item \textbf{Inscripto}: el alumno fue inscripto para ser habilitado a cursar el grado registrado
-  \item \textbf{Promueve}: el alumno promocionó el grado que se encontraba cursando y es habilitado a cursar el grado siguiente
-  \item \textbf{Repite}: el alumno repite el grado que se encontraba cursando y debe ser inscripto en el mismo grado
+  \item \textbf{Inscripto}: el alumno fue inscripto y es habilitado a cursar el grado registrado
+  \item \textbf{Promueve}: el alumno cumplió los requisitos para promocionar el grado al cual se encuentra inscripto y es habilitado a ser inscripto en el grado siguiente o a graduarse si se encontraba en el 12avo grado
+  \item \textbf{Repite}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
 
 
 Se deben especificar las siguientes operaciones:
 
-1. \textbf{Inscribir}: un directivo inscribe a un alumno su primer año o al siguiente al último que haya cursado
+1. \textbf{Inscribir}: un directivo inscribe por primera vez a un alumno a primer grado o a un alumno pre-existente al grado que corresponda según su último estado de inscripción
 
 2. \textbf{Cerrar inscripción}: la inscripción actual es cerrada correspondientemente a si cumplió o no los requisitos para promocionar de grado
 
@@ -104,6 +104,8 @@ Se deben especificar las siguientes operaciones:
 El legajo de un alumno será compartido globalmente entre todas las escuelas que utilicen el sistema, de esta forma se registra el historial completo de un alumno desde el primer grado hasta el último.
 Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
 Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto cada estado de cada inscripción es inmutable, si un alumno repite se produce un nuevo registro con estado \textbf{Inscripto} en el mismo grado y si promociona se registra nuevamente con el estado \textbf{Promueve}.
+
+\textbf{Nota:} Esto quizás es demasiado para el enunciado, mucho puede moverse a los comentarios entre los esquemas más abajo
 
 %%[20:21, 27/01/2025] Fari: una invariante linda pero complicada sería que para cada grado g, existe g -1 donde (g - 1, promueve) pertenece a la secuencia
 %%[20:22, 27/01/2025] Fari: o que para g, todo x < g esté en la secuencia
