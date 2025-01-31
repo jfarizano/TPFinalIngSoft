@@ -14,3 +14,13 @@
 *.out
 *.o
 czt.sty
+setlog.pl
+setlog_rules.pl
+setlog_tc.pl
+setlog_vcg.pl
+setloglib.slog
+setloglibTPTP.slog
+setloglib_tc.slog
+setlogliblist.slog
+setloglibpf.slog
+size_solver.pl

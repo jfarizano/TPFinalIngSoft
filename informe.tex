@@ -76,7 +76,7 @@
   \end{titlepage}
 
 \section*{El problema}
-Queremos especificar el funcionamiento de un sistema que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación, lo descrito es similar a un sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
+Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
 
 
 Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno cuenta con un legajo donde cada entrada una representa un paso del alumno por el sistema educativo; cada registro describe el grado en que el alumno fue inscripto y tiene tres estados posibles:
@@ -87,7 +87,7 @@ Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumn
   \item \textbf{Repite}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
 
-Además se desea llevar un registro de los alumnos graduados, es decir alumnos que haya promocionado 12avo grado.
+Además se desea llevar un registro fácilmente accesible de los alumnos graduados, es decir alumnos que haya promocionado 12avo grado.
 
 Se deben especificar las siguientes operaciones:
 
@@ -97,7 +97,7 @@ Se deben especificar las siguientes operaciones:
 
 3. \textbf{Consultar repitencia}: se desea consultar si un alumno repitió el último grado que haya cursado
 
-El legajo de un alumno será compartido globalmente entre todas las escuelas que utilicen el sistema, de esta forma se registra el historial completo de un alumno desde el primer grado hasta el último.
+Se asume que se registrará el historial completo del alumno, empezando siempre desde primer grado hasta que finalice.
 Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
 Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto cada estado de cada inscripción es inmutable, si un alumno repite se produce un nuevo registro con estado \textbf{Inscripto} en el mismo grado y si promociona se registra nuevamente con el estado \textbf{Promueve}.
 
@@ -106,165 +106,6 @@ Se quieren saber todos los estados que pasaron las inscripciones, por lo tanto c
 \section*{Designaciones}
 
 \section*{Especificación en Z}
-  \begin{zed}
-    [ALUMNO] \\
-    GRADO == \nat \\
-    ESTADO ::= inscripto | promueve | repite \\
-    REP ::= alumnoEsRepitente | alumnoNoEsRepitente | alumnoNoEncontrado
-  \end{zed}
-  
-  \begin{schema}{Escuela}
-    legajos: ALUMNO \pfun \seq{GRADO \cross ESTADO} \\
-    graduados: \power{ALUMNO}
-  \end{schema}
+\input{misestudiantes.tex}
 
-  \begin{schema}{RequisitoGraduadoInv}
-    Escuela
-    \where
-    \forall a \in graduados @ (last \; (legajos \; a?)).1 = 12 \land (last \; (legajos \; a?)).2 = promueve
-  \end{schema}
-
-  \begin{schema}{GraduadoTieneLegajoInv}
-    Escuela
-    \where
-    graduados \subseteq \dom{legajos}
-  \end{schema}
-
-  \begin{schema}{EscuelaInicial}
-    Escuela
-    \where
-    legajos = \emptyset \\
-    graduados = \emptyset
-  \end{schema}
-
-  \begin{schema}{InscribirAlumnoNuevoOk}
-    \Delta Escuela \\
-    a? : ALUMNO
-    \where
-    a? \notin \dom{legajos} \\
-    legajos' = legajos \cup \{a? \mapsto \langle (1, inscripto) \rangle\} \\
-    graduados' = graduados
-  \end{schema}
-
-  \begin{schema}{InscribirAlumnoPromovidoOk}
-    \Delta Escuela \\
-    a? : ALUMNO
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 = promueve \\
-    1 \leq (last \; (legajos \; a?)).1 < 12 \\ 
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1 + 1, inscripto) \rangle\} \\
-    graduados' = graduados
-  \end{schema}
-
-  \begin{schema}{InscribirAlumnoRepitenteOk}
-    \Delta Escuela \\
-    a? : ALUMNO
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 = repite \\
-    1 \leq (last \; (legajos \; a?)).1 \leq 12 \\ 
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, inscripto) \rangle\} \\
-    graduados' = graduados
-  \end{schema}
-
-  \begin{schema}{InscribirAlumnoGraduadoE}
-    \Xi Escuela \\
-    a? : ALUMNO
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 = promueve \\
-    (last \; (legajos \; a?)).1 = 12
-  \end{schema}
-
-  \begin{schema}{InscribirAlumnoDobleInscripE}
-    \Xi Escuela \\
-    a? : ALUMNO
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 = inscripto
-  \end{schema}
-
-  \begin{zed}
-    InscribirAlumnoE == InscribirAlumnoGraduadoE \lor InscribirAlumnoDobleInscripE \\
-    InscribirAlumnoOk == InscribirAlumnoNuevoOk \lor InscribirAlumnoPromovidoOk \\ 
-                         \lor InscribirAlumnoRepitenteOk \\
-    InscribirAlumno == InscribirAlumnoOk \lor InscribirAlumnoE
-  \end{zed}
-
-  \begin{schema}{CerrarInscripcionNoGraduadoOk}
-    \Delta Escuela \\
-    a?: ALUMNO \\
-    e?: ESTADO
-    \where
-    a? \in \dom{legajos} \\
-    e? = repite \lor (e? = promueve \land (last \; (legajos \; a?)).1 < 12) \\
-    (last \; (legajos \; a?)).2 = inscripto \\
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, e?) \rangle\}
-  \end{schema}
-
-  \begin{schema}{CerrarInscripcionGraduadoOk}
-    \Delta Escuela \\
-    a?: ALUMNO \\
-    e?: ESTADO
-    \where
-    a? \in \dom{legajos} \\
-    e? = promueve \\
-    (last \; (legajos \; a?)).1 = 12 \\
-    (last \; (legajos \; a?)).2 = inscripto \\
-    legajos' = legajos \oplus \{a? \mapsto legajos \; a? \cat \langle ((last \; (legajos \; a?)).1, e?) \rangle\} \\
-    graduados' = graduados \cup \{ a? \}
-  \end{schema}
-
-  \begin{schema}{CerrarInscripcionEstadoInvalidoE}
-    \Xi Escuela \\
-    e?: ESTADO
-    \where
-    e? = inscripto
-  \end{schema}
-
-  \begin{schema}{CerrarInscripcionAlumnoNoEncontradoE}
-    \Xi Escuela \\
-    a? : ALUMNO
-    \where
-    a? \notin \dom{legajos}
-  \end{schema}
-
-  \begin{zed}
-    CerrarInscripcionE == CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
-    CerarrInscripcionOk == CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk \\
-    CerrarInscripcion == CerrarInscripcionOk \lor CerrarInscripcionE
-  \end{zed}
-
-  \begin{schema}{AlumnoEsRepitenteSiOk}
-    \Xi Escuela \\
-    rep!: REP
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 = repite \\
-    rep! = alumnoEsRepitente
-  \end{schema}
-
-  \begin{schema}{AlumnoEsRepitenteNoOk}
-    \Xi Escuela \\
-    rep!: REP
-    \where
-    a? \in \dom{legajos} \\
-    (last \; (legajos \; a?)).2 \neq repite \\
-    rep! = alumnoNoEsRepitente
-  \end{schema}
-
-  \begin{schema}{AlumnoEsRepitenteNoEncontradoE}
-    \Xi Escuela \\
-    rep!: REP
-    \where
-    a? \notin \dom{legajos} \\
-    rep! = alumnoNoEncontrado
-  \end{schema}
-
-  \begin{zed}
-    AlumnoEsRepitenteE == AlumnoEsRepitenteNoEncontradoE \\
-    AlumnoEsRepitenteOk == AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk \\
-    AlumnoEsRepitente == AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE \\
-  \end{zed}
 \end{document}

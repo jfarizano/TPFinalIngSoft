@@ -1,0 +1,4 @@
+consult('misestudiantes.pl', mute).
+misEstudiantesInicial(L0, G0) & inscribirAlumnoNuevoOk(L0, G0, fari, L1, G1).
+misEstudiantesInicial(L0, G0) & inscribirAlumnoNuevoOk(L0, G0, fari, L1, G1) & inscribirAlumnoPromovidoOk(L1, G1, fari, L2, G2).
+
