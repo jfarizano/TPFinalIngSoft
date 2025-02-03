@@ -13,7 +13,7 @@
 \begin{schema}{RequisitoGraduadoInv}
     MisEstudiantes
     \where
-    \forall a \in graduados @ (last \; (legajos \; alumno?)).1 = 12 \land (last \; (legajos \; alumno?)).2 = promueve
+    \forall a \in graduados @ (last \; (legajos \; a)).1 = 12 \land (last \; (legajos \; a)).2 = promueve
 \end{schema}
 
 \begin{schema}{GraduadoTieneLegajoInv}
