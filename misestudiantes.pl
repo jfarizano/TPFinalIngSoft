@@ -52,9 +52,52 @@ variables([Legajos, Graduados]).
 invariant(graduadoTieneLegajoInv).
 dec_p_type(graduadoTieneLegajoInv(legajos, alumnos)).
 graduadoTieneLegajoInv(Legajos, Graduados) :-
-    dom(Legajos, D) & 
-    dec(D, alumnos) &
-    subset(Graduados, D).
+    let([D],
+        dom(Legajos, D) & dec(D, alumnos),
+        subset(Graduados, D)
+    ).
+
+dec_p_type(n_graduadoTieneLegajoInv(legajos, alumnos)).
+n_graduadoTieneLegajoInv(Legajos, Graduados) :-
+    neg(let([D],
+            dom(Legajos, D) & dec(D, alumnos),
+            subset(Graduados, D)
+    )).
+
+invariant(requisitoGraduadoInv).
+dec_p_type(requisitoGraduadoInv(legajos, alumnos)).
+requisitoGraduadoInv(Legajos, Graduados) :-
+    foreach(A in Graduados,
+            applyTo(Legajos, A, L) &
+            dec(L, legajo) &
+            slast(L, I) &
+            dec(I, inscripcion) &
+            [G, E] = I &
+            dec(G, grado) &
+            dec(E, estado) &
+            E = promueve &
+            G = 12).
+
+dec_p_type(n_requisitoGraduadoInv(legajos, alumnos)).
+n_requisitoGraduadoInv(Legajos, Graduados) :-
+    nforeach(A in Graduados,
+             applyTo(Legajos, A, L) &
+             dec(L, legajo) &
+             slast(L, I) &
+             dec(I, inscripcion) &
+             [G, E] = I &
+             dec(G, grado) &
+             dec(E, estado) &
+             (E neq promueve or G neq 12)).
+
+invariant(legajosPfunInv).
+dec_p_type(legajosPfunInv(legajos)).
+legajosPfunInv(Legajos) :-
+    pfun(Legajos).
+
+dec_p_type(n_legajosPfunInv(legajos)).
+n_legajosPfunInv(Legajos) :-
+    neg(pfun(Legajos)).
 
 dec_p_type(misEstudiantesInicial(legajos, alumnos)).
 initial(misEstudiantesInicial).
@@ -208,7 +251,7 @@ cerrarInscripcion(Legajos, Graduados, Alumno, Estado, Legajos_, Graduados_) :-
     cerrarInscripcionAlumnoNoEncontradoE(Legajos, Graduados, Alumno, Legajos_, Graduados_).
 
 dec_p_type(alumnoEsRepitenteSiOk(legajos, alumnos, alumno, rep, legajos, alumnos)).
-alumnoEsRepitenteSiOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
+alumnoEsRepitenteSiOk(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -221,7 +264,7 @@ alumnoEsRepitenteSiOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
     Rep = alumnoEsRepitente.
 
 dec_p_type(alumnoEsRepitenteNoOk(legajos, alumnos, alumno, rep, legajos, alumnos)).
-alumnoEsRepitenteNoOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
+alumnoEsRepitenteNoOk(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -234,13 +277,13 @@ alumnoEsRepitenteNoOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
     Rep = alumnoNoEsRepitente.
 
 dec_p_type(alumnoEsRepitenteNoEncontradoE(legajos, alumnos, alumno, rep, legajos, alumnos)).
-alumnoEsRepitenteNoEncontradoE(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
+alumnoEsRepitenteNoEncontradoE(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) :-
     ninDom(Alumno, Legajos) &
     Rep = alumnoNoEncontrado.
 
 dec_p_type(alumnoEsRepitente(legajos, alumnos, alumno, rep, legajos, alumnos)).
 operation(alumnoEsRepitente).
-alumnoEsRepitente(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) :-
-    alumnoEsRepitenteSiOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) or
-    alumnoEsRepitenteNoOk(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_) or
-    alumnoEsRepitenteNoEncontradoE(Legajos, Graduados, Alumno, Rep, Legajos_, Graduados_).
+alumnoEsRepitente(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) :-
+    alumnoEsRepitenteSiOk(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) or
+    alumnoEsRepitenteNoOk(Legajos, Graduados, Alumno, Rep, Legajos, Graduados) or
+    alumnoEsRepitenteNoEncontradoE(Legajos, Graduados, Alumno, Rep, Legajos, Graduados).

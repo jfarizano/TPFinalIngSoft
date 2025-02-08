@@ -24,3 +24,5 @@ setloglib_tc.slog
 setlogliblist.slog
 setloglibpf.slog
 size_solver.pl
+misestudiantes-all.pl
+misestudiantes-vc.pl

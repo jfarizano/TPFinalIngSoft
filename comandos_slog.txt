@@ -1,4 +1,10 @@
-consult('misestudiantes.pl', mute).
+consult('setlog.pl').
+setlog.
+type_check & reset_types & consult('misestudiantes.pl', mute) & notype_check.
+
+vcg('misestudiantes.pl').
+consult('misestudiantes-vc.pl').
+check_vcs_misestudiantes.
 
 -- Primera inscripcion con estado inicial
 misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1).
@@ -28,3 +34,9 @@ alumnoEsRepitente({[fari,{[1,[5,repite]]}]}, {}, fari, Rep, L_, G_).
 
 -- Alumno no encontrado
 alumnoEsRepitente({[fari,{[1,[5,repite]]}]}, {}, pepe, Rep, L_, G_).
+
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, promueve, L2, G2) & alumnoEsRepitente(L2, G2, fari, Rep1, L3, G3) & inscribirAlumno(L3, G3, fari, L4, G4) & cerrarInscripcion(L4, G4, fari, repite, L5, G5) & alumnoEsRepitente(L5, G5, fari, Rep2, L6, G6) & alumnoEsRepitente(L6, G6, pepe, Rep3, L7, G7).
+
+
+
+L0 = {[fari,{[1,[12,inscripto]]}]} & G0 = {} & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, repite, L2, G2) & inscribirAlumno(L2, G2, fari, L3, G3) & cerrarInscripcion(L3, G3, fari, promueve, L4, G4) & inscribirAlumno(L4, G4, fari, L5, G5).

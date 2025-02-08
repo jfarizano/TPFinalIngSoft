@@ -78,10 +78,10 @@
 \end{schema}
 
 \begin{zed}
-    InscribirAlumnoE \defs InscribirAlumnoGraduadoE \lor InscribirAlumnoDobleInscripE \\
-    InscribirAlumnoOk \defs InscribirAlumnoNuevoOk \lor InscribirAlumnoPromovidoOk \\ 
+    InscribirAlumnoE == InscribirAlumnoGraduadoE \lor InscribirAlumnoDobleInscripE \\
+    InscribirAlumnoOk == InscribirAlumnoNuevoOk \lor InscribirAlumnoPromovidoOk \\ 
                          \lor InscribirAlumnoRepitenteOk \\
-    InscribirAlumno \defs InscribirAlumnoOk \lor InscribirAlumnoE
+    InscribirAlumno == InscribirAlumnoOk \lor InscribirAlumnoE
 \end{zed}
 
 \begin{schema}{CerrarInscripcionNoGraduadoOk}
@@ -123,9 +123,9 @@
 \end{schema}
 
 \begin{zed}
-    CerrarInscripcionE \defs CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
-    CerrarInscripcionOk \defs CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk \\
-    CerrarInscripcion \defs CerrarInscripcionOk \lor CerrarInscripcionE
+    CerrarInscripcionE == CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
+    CerrarInscripcionOk == CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk \\
+    CerrarInscripcion == CerrarInscripcionOk \lor CerrarInscripcionE
 \end{zed}
 
 \begin{schema}{AlumnoEsRepitenteSiOk}
@@ -158,11 +158,7 @@
 \end{schema}
 
 \begin{zed}
-    AlumnoEsRepitenteE \defs AlumnoEsRepitenteNoEncontradoE \\
-    AlumnoEsRepitenteOk \defs AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk \\
-    AlumnoEsRepitente \defs AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE \\
+    AlumnoEsRepitenteE == AlumnoEsRepitenteNoEncontradoE \\
+    AlumnoEsRepitenteOk == AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk \\
+    AlumnoEsRepitente == AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE \\
 \end{zed}
-
-\begin{theorem}{CerrarInscripcionRequisitoGraduadoInv}
-    RequisitoGraduadoInv \land CerrarInscripcion \implies RequisitoGraduadoInv'
-\end{theorem}
