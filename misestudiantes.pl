@@ -64,32 +64,6 @@ n_graduadoTieneLegajoInv(Legajos, Graduados) :-
             subset(Graduados, D)
     )).
 
-invariant(requisitoGraduadoInv).
-dec_p_type(requisitoGraduadoInv(legajos, alumnos)).
-requisitoGraduadoInv(Legajos, Graduados) :-
-    foreach(A in Graduados,
-            applyTo(Legajos, A, L) &
-            dec(L, legajo) &
-            slast(L, I) &
-            dec(I, inscripcion) &
-            [G, E] = I &
-            dec(G, grado) &
-            dec(E, estado) &
-            E = promueve &
-            G = 12).
-
-dec_p_type(n_requisitoGraduadoInv(legajos, alumnos)).
-n_requisitoGraduadoInv(Legajos, Graduados) :-
-    nforeach(A in Graduados,
-             applyTo(Legajos, A, L) &
-             dec(L, legajo) &
-             slast(L, I) &
-             dec(I, inscripcion) &
-             [G, E] = I &
-             dec(G, grado) &
-             dec(E, estado) &
-             (E neq promueve or G neq 12)).
-
 invariant(legajosPfunInv).
 dec_p_type(legajosPfunInv(legajos)).
 legajosPfunInv(Legajos) :-
@@ -97,7 +71,7 @@ legajosPfunInv(Legajos) :-
 
 dec_p_type(n_legajosPfunInv(legajos)).
 n_legajosPfunInv(Legajos) :-
-    neg(pfun(Legajos)).
+    npfun(Legajos).
 
 dec_p_type(misEstudiantesInicial(legajos, alumnos)).
 initial(misEstudiantesInicial).
@@ -105,16 +79,28 @@ misEstudiantesInicial(Legajos, Graduados) :-
     Legajos = {} &
     Graduados = {}.
 
-dec_p_type(inscribirAlumnoNuevoOk(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumnoNuevoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+dec_p_type(inscribirAlumnoOk(legajos, alumnos, alumno, legajos, alumnos)).
+inscribirAlumnoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     ninDom(Alumno, Legajos) &
     sadd({}, [1, inscripto], L) &
     dec(L, legajo) &
     un(Legajos, {[Alumno, L]} , Legajos_) &
     Graduados_ = Graduados.
 
-dec_p_type(inscribirAlumnoPromovidoOk(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+dec_p_type(inscribirAlumnoRegistradoE(legajos, alumnos, alumno, legajos, alumnos)).
+inscribirAlumnoRegistradoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+    inDom(Alumno, Legajos) &
+    Legajos_ = Legajos &
+    Graduados_ = Graduados.
+
+operation(inscribirAlumno).
+dec_p_type(inscribirAlumno(legajos, alumnos, alumno, legajos, alumnos)).
+inscribirAlumno(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+    inscribirAlumnoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
+    inscribirAlumnoRegistradoE(Legajos, Graduados, Alumno, Legajos_, Graduados_).
+
+dec_p_type(reinscribirAlumnoPromovidoOk(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -134,8 +120,8 @@ inscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     oplus(Legajos, {[Alumno, L_]}, Legajos_) &
     Graduados_ = Graduados.
 
-dec_p_type(inscribirAlumnoRepitenteOk(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+dec_p_type(reinscribirAlumnoRepitenteOk(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -153,8 +139,14 @@ inscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     oplus(Legajos, {[Alumno, L_]}, Legajos_) &
     Graduados_ = Graduados.
 
-dec_p_type(inscribirAlumnoGraduadoE(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+dec_p_type(reinscribirAlumnoNoEncontradoE(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumnoNoEncontradoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+    ninDom(Alumno, Legajos) &
+    Legajos_ = Legajos &
+    Graduados_ = Graduados.
+
+dec_p_type(reinscribirAlumnoGraduadoE(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -168,8 +160,8 @@ inscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     Legajos_ = Legajos  &
     Graduados_ = Graduados.
 
-dec_p_type(inscribirAlumnoDobleInscripE(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumnoDobleInscripE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+dec_p_type(reinscribirAlumnoDobleInscripE(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumnoDobleInscripE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     inDom(Alumno, Legajos) &
     applyTo(Legajos, Alumno, L) &
     dec(L, legajo) &
@@ -182,14 +174,14 @@ inscribirAlumnoDobleInscripE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :
     Legajos_ = Legajos  &
     Graduados_ = Graduados.
 
-operation(inscribirAlumno).
-dec_p_type(inscribirAlumno(legajos, alumnos, alumno, legajos, alumnos)).
-inscribirAlumno(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
-    inscribirAlumnoNuevoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
-    inscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
-    inscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
-    inscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
-    inscribirAlumnoDobleInscripE(Legajos, Graduados, Alumno, Legajos_, Graduados_).
+operation(reinscribirAlumno).
+dec_p_type(reinscribirAlumno(legajos, alumnos, alumno, legajos, alumnos)).
+reinscribirAlumno(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
+    reinscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
+    reinscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
+    reinscribirAlumnoNoEncontradoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
+    reinscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) or
+    reinscribirAlumnoDobleInscripE(Legajos, Graduados, Alumno, Legajos_, Graduados_).
 
 dec_p_type(cerrarInscripcionNoGraduadoOk(legajos, alumnos, alumno, estado, legajos, alumnos)).
 cerrarInscripcionNoGraduadoOk(Legajos, Graduados, Alumno, Estado, Legajos_, Graduados_) :-

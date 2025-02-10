@@ -7,36 +7,39 @@ consult('misestudiantes-vc.pl').
 check_vcs_misestudiantes.
 
 -- Primera inscripcion con estado inicial
-misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1).
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, pepe, L1, G1).
 
 -- Doble inscripcion
-misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1) & inscribirAlumno(L1, G1, fari, L2, G2).
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, pepe, L1, G1) & reinscribirAlumno(L1, G1, pepe, L2, G2).
 
 -- Primera inscripcion, promueve e inscribe de nuevo
-misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, promueve, L2, G2) & inscribirAlumno(L2, G2, fari, L3, G3).
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, pepe, L1, G1) & cerrarInscripcion(L1, G1, pepe, promueve, L2, G2) & reinscribirAlumno(L2, G2, pepe, L3, G3).
 -- Primera inscripcion, repite e inscribe de nuevo
-misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, repite, L2, G2) & inscribirAlumno(L2, G2, fari, L3, G3).
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, pepe, L1, G1) & cerrarInscripcion(L1, G1, pepe, repite, L2, G2) & reinscribirAlumno(L2, G2, pepe, L3, G3).
 
 -- Inscripcion graduado
-inscribirAlumno({[fari,{[1,[12,promueve]]}]}, {fari}, fari, L_, G_).
+reinscribirAlumno({[pepe,{[1,[12,promueve]]}]}, {pepe}, pepe, L_, G_).
+
+-- Reinscribir alumno no encontrado
+reinscribirAlumno({}, {}, pepe, L_, G_).
 
 -- Graduar alumno
-cerrarInscripcion({[fari,{[1,[12,inscripto]]}]}, {}, fari, promueve, L_, G_).
+cerrarInscripcion({[pepe,{[1,[12,inscripto]]}]}, {}, pepe, promueve, L_, G_).
 
 -- Cerrar inscripcion alumno no encontrado
-cerrarInscripcion({[fari,{[1,[12,inscripto]]}]}, {}, pepe, promueve, L_, G_).
+cerrarInscripcion({[pepe,{[1,[12,inscripto]]}]}, {}, pepito, promueve, L_, G_).
 
 -- Alumno no es repitente
-alumnoEsRepitente({[fari,{[1,[5,promueve]]}]}, {}, fari, Rep, L_, G_).
+alumnoEsRepitente({[pepe,{[1,[5,promueve]]}]}, {}, pepe, Rep, L_, G_).
 
 -- Alumno es repitente
-alumnoEsRepitente({[fari,{[1,[5,repite]]}]}, {}, fari, Rep, L_, G_).
+alumnoEsRepitente({[pepe,{[1,[5,repite]]}]}, {}, pepe, Rep, L_, G_).
 
 -- Alumno no encontrado
-alumnoEsRepitente({[fari,{[1,[5,repite]]}]}, {}, pepe, Rep, L_, G_).
+alumnoEsRepitente({[pepe,{[1,[5,repite]]}]}, {}, pepito, Rep, L_, G_).
 
-misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, promueve, L2, G2) & alumnoEsRepitente(L2, G2, fari, Rep1, L3, G3) & inscribirAlumno(L3, G3, fari, L4, G4) & cerrarInscripcion(L4, G4, fari, repite, L5, G5) & alumnoEsRepitente(L5, G5, fari, Rep2, L6, G6) & alumnoEsRepitente(L6, G6, pepe, Rep3, L7, G7).
+misEstudiantesInicial(L0, G0) & inscribirAlumno(L0, G0, pepe, L1, G1) & cerrarInscripcion(L1, G1, pepe, promueve, L2, G2) & alumnoEsRepitente(L2, G2, pepe, Rep1, L2, G2) & reinscribirAlumno(L2, G2, pepe, L3, G3) & cerrarInscripcion(L3, G3, pepe, repite, L4, G4) & alumnoEsRepitente(L4, G4, pepe, Rep2, L4, G4) & alumnoEsRepitente(L4, G4, pepito, Rep3, L5, G5).
 
 
 
-L0 = {[fari,{[1,[12,inscripto]]}]} & G0 = {} & inscribirAlumno(L0, G0, fari, L1, G1) & cerrarInscripcion(L1, G1, fari, repite, L2, G2) & inscribirAlumno(L2, G2, fari, L3, G3) & cerrarInscripcion(L3, G3, fari, promueve, L4, G4) & inscribirAlumno(L4, G4, fari, L5, G5).
+L0 = {[pepe,{[1,[12,inscripto]]}]} & G0 = {} & reinscribirAlumno(L0, G0, pepe, L1, G1) & cerrarInscripcion(L1, G1, pepe, repite, L2, G2) & reinscribirAlumno(L2, G2, pepe, L3, G3) & cerrarInscripcion(L3, G3, pepe, promueve, L4, G4) & inscribirAlumno(L4, G4, pepe, L5, G5).

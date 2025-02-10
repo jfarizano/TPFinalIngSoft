@@ -1,7 +1,13 @@
 \begin{zed}
     [ALUMNO] \\
+\end{zed}
+\begin{zed}
     GRADO == \nat \\
+\end{zed}
+\begin{zed}
     ESTADO ::= inscripto | promueve | repite \\
+\end{zed}
+\begin{zed}
     REP ::= alumnoEsRepitente | alumnoNoEsRepitente | alumnoNoEncontrado
 \end{zed}
 
@@ -19,7 +25,7 @@
 \begin{schema}{RequisitoGraduadoInv}
     MisEstudiantes
     \where
-    \forall a : graduados @ (last \; (legajos \; a)).1 = 12 \land (last \; (legajos \; a)).2 = promueve
+    \forall a : graduados @ (last (legajos a)).1 = 12 \land (last (legajos a)).2 = promueve
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
@@ -46,7 +52,7 @@
 \end{schema}
 
 \begin{zed}
-    InscribirAlumno == InscribirAlumnoOk \lor InscribirAlumnoRegistradoE
+    InscribirAlumno \defs InscribirAlumnoOk \lor InscribirAlumnoRegistradoE
 \end{zed}
 
 \begin{schema}{ReinscribirAlumnoPromovidoOk}
@@ -54,9 +60,9 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 = promueve \\
-    (last \; (legajos \; alumno?)).1 < 12 \\ 
-    legajos' = legajos \oplus \{alumno? \mapsto legajos \; alumno? \cat \langle ((last \; (legajos \; alumno?)).1 + 1, inscripto) \rangle\} \\
+    (last (legajos alumno?)).2 = promueve \\
+    (last (legajos alumno?)).1 < 12 \\ 
+    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1 + 1, inscripto) \rangle\} \\
     graduados' = graduados
 \end{schema}
 
@@ -65,9 +71,9 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 = repite \\
-    (last \; (legajos \; alumno?)).1 \leq 12 \\ 
-    legajos' = legajos \oplus \{alumno? \mapsto legajos \; alumno? \cat \langle ((last \; (legajos \; alumno?)).1, inscripto) \rangle\} \\
+    (last (legajos alumno?)).2 = repite \\
+    (last (legajos alumno?)).1 \leq 12 \\ 
+    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, inscripto) \rangle\} \\
     graduados' = graduados
 \end{schema}
 
@@ -83,8 +89,8 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 = promueve \\
-    (last \; (legajos \; alumno?)).1 = 12
+    (last (legajos alumno?)).2 = promueve \\
+    (last (legajos alumno?)).1 = 12
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoDobleInscripE}
@@ -92,14 +98,17 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 = inscripto
+    (last (legajos alumno?)).2 = inscripto
 \end{schema}
 
 \begin{zed}
-    ReinscribirAlumnoE == ReinscribirAlumnoGraduadoE \lor ReinscribirAlumnoDobleInscripE \\
-                             \lor ReinscribirAlumnoNoEncontradoE \\
-    ReinscribirAlumnoOk == ReinscribirAlumnoPromovidoOk \lor ReinscribirAlumnoRepitenteOk \\
-    ReinscribirAlumno == ReinscribirAlumnoOk \lor ReinscribirAlumnoE
+    ReinscribirAlumnoE \defs ReinscribirAlumnoGraduadoE \lor ReinscribirAlumnoDobleInscripE \lor ReinscribirAlumnoNoEncontradoE
+\end{zed}
+\begin{zed}
+    ReinscribirAlumnoOk \defs ReinscribirAlumnoPromovidoOk \lor ReinscribirAlumnoRepitenteOk
+\end{zed}
+\begin{zed}
+    ReinscribirAlumno \defs ReinscribirAlumnoOk \lor ReinscribirAlumnoE
 \end{zed}
 
 \begin{schema}{CerrarInscripcionNoGraduadoOk}
@@ -108,9 +117,9 @@
     estado?: ESTADO
     \where
     alumno? \in \dom legajos \\
-    estado? = repite \lor (estado? = promueve \land (last \; (legajos \; alumno?)).1 < 12) \\
-    (last \; (legajos \; alumno?)).2 = inscripto \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos \; alumno? \cat \langle ((last \; (legajos \; alumno?)).1, estado?) \rangle\} \\
+    estado? = repite \lor (estado? = promueve \land (last (legajos alumno?)).1 < 12) \\
+    (last (legajos alumno?)).2 = inscripto \\
+    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, estado?) \rangle\} \\
     graduados' = graduados
 \end{schema}
 
@@ -121,9 +130,9 @@
     \where
     alumno? \in \dom legajos \\
     estado? = promueve \\
-    (last \; (legajos \; alumno?)).1 = 12 \\
-    (last \; (legajos \; alumno?)).2 = inscripto \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos \; alumno? \cat \langle ((last \; (legajos \; alumno?)).1, estado?) \rangle\} \\
+    (last (legajos alumno?)).1 = 12 \\
+    (last (legajos alumno?)).2 = inscripto \\
+    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, estado?) \rangle\} \\
     graduados' = graduados \cup \{ alumno? \}
 \end{schema}
 
@@ -142,9 +151,13 @@
 \end{schema}
 
 \begin{zed}
-    CerrarInscripcionE == CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
-    CerrarInscripcionOk == CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk \\
-    CerrarInscripcion == CerrarInscripcionOk \lor CerrarInscripcionE
+    CerrarInscripcionE \defs CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE 
+\end{zed}
+\begin{zed}
+    CerrarInscripcionOk \defs CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk
+\end{zed}
+\begin{zed}
+    CerrarInscripcion \defs CerrarInscripcionOk \lor CerrarInscripcionE
 \end{zed}
 
 \begin{schema}{AlumnoEsRepitenteSiOk}
@@ -153,7 +166,7 @@
     rep!: REP
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 = repite \\
+    (last (legajos alumno?)).2 = repite \\
     rep! = alumnoEsRepitente
 \end{schema}
 
@@ -163,7 +176,7 @@
     rep!: REP
     \where
     alumno? \in \dom legajos \\
-    (last \; (legajos \; alumno?)).2 \neq repite \\
+    (last (legajos alumno?)).2 \neq repite \\
     rep! = alumnoNoEsRepitente
 \end{schema}
 
@@ -177,7 +190,16 @@
 \end{schema}
 
 \begin{zed}
-    AlumnoEsRepitenteE == AlumnoEsRepitenteNoEncontradoE \\
-    AlumnoEsRepitenteOk == AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk \\
-    AlumnoEsRepitente == AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE \\
+    AlumnoEsRepitenteE \defs AlumnoEsRepitenteNoEncontradoE 
 \end{zed}
+\begin{zed}
+    AlumnoEsRepitenteOk \defs AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk 
+\end{zed}
+\begin{zed}
+    AlumnoEsRepitente \defs AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE
+\end{zed}
+
+\begin{theorem}{GraduadoTieneLegajoInvCerrarInscripcion}
+    GraduadoTieneLegajoInv \land CerrarInscripcion \implies GraduadoTieneLegajoInv'
+\end{theorem}
+
