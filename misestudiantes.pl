@@ -6,6 +6,11 @@ def_type(legajo, rel(int, inscripcion)).
 def_type(legajos, rel(alumno, legajo)).
 def_type(alumnos, set(alumno)).
 
+%%% ==========================================================================
+%%% Funciones copiadas de las librerías para agregar las declaraciones de 
+%%% tipos necesarias para usar el type checker
+%%% ==========================================================================
+
 dec_pp_type(inDom(X, rel(X,Y))).
 inDom(Item, Rel) :- 
     dom(Rel, {Item/Z}) & dec(Z, set(X)).
@@ -46,6 +51,9 @@ sadd(S,E,T) :-
   M is N + 1 &
   dec(M, int) &
   T = {[M,E] / S}.
+
+%%% ==========================================================================
+%%% ==========================================================================
 
 variables([Legajos, Graduados]).
 
@@ -109,8 +117,8 @@ reinscribirAlumnoPromovidoOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    E = promueve &
     G < 12 &
+    E = promueve &
     G_ is G + 1 &
     dec(G_, grado) &
     I_ = [G_, inscripto] &
@@ -130,8 +138,8 @@ reinscribirAlumnoRepitenteOk(Legajos, Graduados, Alumno, Legajos_, Graduados_) :
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
+    G =< 12 &
     E = repite &
-    G < 13 &
     I_ = [G, inscripto] &
     dec(I_, inscripcion) &
     sadd(L, I_, L_) &
@@ -155,8 +163,8 @@ reinscribirAlumnoGraduadoE(Legajos, Graduados, Alumno, Legajos_, Graduados_) :-
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    E = promueve &
     G = 12 &
+    E = promueve &
     Legajos_ = Legajos  &
     Graduados_ = Graduados.
 

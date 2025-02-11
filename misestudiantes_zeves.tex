@@ -22,10 +22,10 @@
     graduados \subseteq \dom legajos
 \end{schema}
 
-\begin{schema}{RequisitoGraduadoInv}
+\begin{schema}{GraduadosRequisitosInv}
     MisEstudiantes
     \where
-    \forall a : graduados @ (last (legajos a)).1 = 12 \land (last (legajos a)).2 = promueve
+    \forall a : \dom legajos @ (a \in graduados) \iff ((last (legajos a)).1 = 12 \land (last (legajos a)).2 = promueve)
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
@@ -60,8 +60,8 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 = promueve \\
     (last (legajos alumno?)).1 < 12 \\ 
+    (last (legajos alumno?)).2 = promueve \\
     legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1 + 1, inscripto) \rangle\} \\
     graduados' = graduados
 \end{schema}
@@ -71,8 +71,8 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 = repite \\
     (last (legajos alumno?)).1 \leq 12 \\ 
+    (last (legajos alumno?)).2 = repite \\
     legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, inscripto) \rangle\} \\
     graduados' = graduados
 \end{schema}
@@ -89,8 +89,8 @@
     alumno? : ALUMNO
     \where
     alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 = promueve \\
-    (last (legajos alumno?)).1 = 12
+    (last (legajos alumno?)).1 = 12 \\
+    (last (legajos alumno?)).2 = promueve
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoDobleInscripE}
