@@ -1,54 +1,54 @@
 \begin{zed}
-    [ALUMNO] \\
+    [ALUMNO]
 \end{zed}
 \begin{zed}
-    GRADO == \nat \\
+    GRADO == \nat
 \end{zed}
 \begin{zed}
-    ESTADO ::= inscripto | promueve | repite \\
+    ESTADO ::= inscripto | promueve | repite
 \end{zed}
 \begin{zed}
-    REP ::= alumnoEsRepitente | alumnoNoEsRepitente | alumnoNoEncontrado
+    REP ::= alumnoEsGraduado | alumnoNoEsGraduado | alumnoNoEncontrado
 \end{zed}
 
 \begin{schema}{MisEstudiantes}
-    legajos: ALUMNO \pfun \seq (GRADO \cross ESTADO) \\
-    graduados: \power ALUMNO
+    registrados: \power ALUMNO \\
+    inscripciones: ALUMNO \pfun (GRADO \cross ESTADO)
 \end{schema}
 
-\begin{schema}{GraduadoTieneLegajoInv}
+\begin{schema}{InscripcionesInv}
     MisEstudiantes
     \where
-    graduados \subseteq \dom legajos
+    \dom inscripciones = registrados
 \end{schema}
 
-\begin{schema}{GraduadosRequisitosInv}
+\begin{schema}{MaximoGradoInv}
     MisEstudiantes
     \where
-    \forall a : \dom legajos @ (a \in graduados) \iff ((last (legajos a)).1 = 12 \land (last (legajos a)).2 = promueve)
+    \forall a : registrados @ (inscripciones a).1 \leq 12
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
     MisEstudiantes
     \where
-    legajos = \emptyset \\
-    graduados = \emptyset
+    registrados = \emptyset \\
+    inscripciones = \emptyset
 \end{schema}
 
 \begin{schema}{InscribirAlumnoOk}
     \Delta MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \notin \dom legajos \\
-    legajos' = legajos \cup \{alumno? \mapsto \langle (1, inscripto) \rangle\} \\
-    graduados' = graduados
+    alumno? \notin registrados \\
+    inscripciones' = inscripciones \cup \{alumno? \mapsto (1, inscripto) \} \\
+    registrados' = registrados \cup \{alumno?\}
 \end{schema}
 
 \begin{schema}{InscribirAlumnoRegistradoE}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \in \dom legajos
+    alumno? \in registrados
 \end{schema}
 
 \begin{zed}
@@ -59,46 +59,46 @@
     \Delta MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).1 < 12 \\ 
-    (last (legajos alumno?)).2 = promueve \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1 + 1, inscripto) \rangle\} \\
-    graduados' = graduados
+    alumno? \in registrados \\
+    (inscripciones alumno?).1 < 12 \\ 
+    (inscripciones alumno?).2 = promueve \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1 + 1, inscripto) \} \\
+    registrados' = registrados
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoRepitenteOk}
     \Delta MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).1 \leq 12 \\ 
-    (last (legajos alumno?)).2 = repite \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, inscripto) \rangle\} \\
-    graduados' = graduados
+    alumno? \in registrados \\
+    (inscripciones alumno?).1 \leq 12 \\ 
+    (inscripciones alumno?).2 = repite \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, inscripto) \} \\
+    registrados' = registrados
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoNoEncontradoE}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \notin \dom legajos
+    alumno? \notin registrados
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoGraduadoE}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).1 = 12 \\
-    (last (legajos alumno?)).2 = promueve
+    alumno? \in registrados \\
+    ((inscripciones alumno?)).1 = 12 \\
+    ((inscripciones alumno?)).2 = promueve 
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoDobleInscripE}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 = inscripto
+    alumno? \in registrados \\
+    (inscripciones alumno?).2 = inscripto
 \end{schema}
 
 \begin{zed}
@@ -111,29 +111,14 @@
     ReinscribirAlumno \defs ReinscribirAlumnoOk \lor ReinscribirAlumnoE
 \end{zed}
 
-\begin{schema}{CerrarInscripcionNoGraduadoOk}
+\begin{schema}{CerrarInscripcionOk}
     \Delta MisEstudiantes \\
     alumno?: ALUMNO \\
     estado?: ESTADO
     \where
-    alumno? \in \dom legajos \\
-    estado? = repite \lor (estado? = promueve \land (last (legajos alumno?)).1 < 12) \\
-    (last (legajos alumno?)).2 = inscripto \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, estado?) \rangle\} \\
-    graduados' = graduados
-\end{schema}
-
-\begin{schema}{CerrarInscripcionGraduadoOk}
-    \Delta MisEstudiantes \\
-    alumno?: ALUMNO \\
-    estado?: ESTADO
-    \where
-    alumno? \in \dom legajos \\
-    estado? = promueve \\
-    (last (legajos alumno?)).1 = 12 \\
-    (last (legajos alumno?)).2 = inscripto \\
-    legajos' = legajos \oplus \{alumno? \mapsto legajos alumno? \cat \langle ((last (legajos alumno?)).1, estado?) \rangle\} \\
-    graduados' = graduados \cup \{ alumno? \}
+    alumno? \in registrados \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, estado?) \} \\
+    registrados' = registrados
 \end{schema}
 
 \begin{schema}{CerrarInscripcionEstadoInvalidoE}
@@ -147,59 +132,71 @@
     \Xi MisEstudiantes \\
     alumno? : ALUMNO
     \where
-    alumno? \notin \dom legajos
+    alumno? \notin registrados
 \end{schema}
 
 \begin{zed}
-    CerrarInscripcionE \defs CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE 
-\end{zed}
-\begin{zed}
-    CerrarInscripcionOk \defs CerrarInscripcionNoGraduadoOk \lor CerrarInscripcionGraduadoOk
+    CerrarInscripcionE \defs CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE
 \end{zed}
 \begin{zed}
     CerrarInscripcion \defs CerrarInscripcionOk \lor CerrarInscripcionE
 \end{zed}
 
-\begin{schema}{AlumnoEsRepitenteSiOk}
+\begin{schema}{AlumnoEsGraduadoSiOk}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO \\
     rep!: REP
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 = repite \\
-    rep! = alumnoEsRepitente
+    alumno? \in registrados \\
+    (inscripciones alumno?).1 = 12 \\
+    (inscripciones alumno?).2 = promueve \\
+    rep! = alumnoEsGraduado
 \end{schema}
 
-\begin{schema}{AlumnoEsRepitenteNoOk}
+\begin{schema}{AlumnoEsGraduadoNoOk}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO \\
     rep!: REP
     \where
-    alumno? \in \dom legajos \\
-    (last (legajos alumno?)).2 \neq repite \\
-    rep! = alumnoNoEsRepitente
+    alumno? \in registrados \\
+    (inscripciones alumno?).1 \neq 12 \lor (inscripciones alumno?).2 \neq promueve \\
+    rep! = alumnoNoEsGraduado
 \end{schema}
 
-\begin{schema}{AlumnoEsRepitenteNoEncontradoE}
+\begin{schema}{AlumnoEsGraduadoNoEncontradoE}
     \Xi MisEstudiantes \\
     alumno? : ALUMNO \\
     rep!: REP
     \where
-    alumno? \notin \dom legajos \\
+    alumno? \notin registrados \\
     rep! = alumnoNoEncontrado
 \end{schema}
 
 \begin{zed}
-    AlumnoEsRepitenteE \defs AlumnoEsRepitenteNoEncontradoE 
+    AlumnoEsGraduadoOk \defs AlumnoEsGraduadoSiOk \lor AlumnoEsGraduadoNoOk
 \end{zed}
 \begin{zed}
-    AlumnoEsRepitenteOk \defs AlumnoEsRepitenteSiOk \lor AlumnoEsRepitenteNoOk 
-\end{zed}
-\begin{zed}
-    AlumnoEsRepitente \defs AlumnoEsRepitenteOk \lor AlumnoEsRepitenteE
+    AlumnoEsGraduado \defs AlumnoEsGraduadoOk \lor AlumnoEsGraduadoNoEncontradoE
 \end{zed}
 
-\begin{theorem}{GraduadoTieneLegajoInvCerrarInscripcion}
-    GraduadoTieneLegajoInv \land CerrarInscripcion \implies GraduadoTieneLegajoInv'
+
+\begin{theorem}{InscribirAlumnoPI}
+    InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
 \end{theorem}
+
+\begin{zproof}[InscribirAlumnoPI]
+    invoke InscribirAlumno;
+    split InscribirAlumnoOk;
+    simplify;
+    cases;
+    invoke InscribirAlumnoOk;
+    invoke InscripcionesInv;
+    equality substitute;
+    reduce;
+    next;
+    invoke InscribirAlumnoRegistradoE;
+    invoke \Xi MisEstudiantes;
+    reduce;
+    next;
+\end{zproof}
 

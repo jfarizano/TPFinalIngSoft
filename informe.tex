@@ -79,15 +79,13 @@
 Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
 
 
-Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno cuenta con un legajo compuesto por entradas donde cada una representa un paso del alumno por el sistema educativo; cada registro describe el grado en que el alumno fue inscripto y tiene tres estados posibles:
+Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno puede encontrarse en una de las siguientes situaciones:
 
 \begin{itemize}
   \item \textbf{Inscripto}: el alumno fue inscripto y es habilitado a cursar el grado registrado
-  \item \textbf{Promueve}: el alumno cumplió los requisitos para promocionar el grado al cual se encuentra inscripto y es habilitado a ser inscripto en el grado siguiente o a graduarse si se encontraba en el 12avo grado
-  \item \textbf{Repite}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
+  \item \textbf{Promovido}: el alumno cumplió los requisitos para promocionar el grado al cual se encuentra inscripto y es habilitado a ser inscripto en el grado siguiente o a graduarse si se encontraba en el 12avo grado
+  \item \textbf{Repitente}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
-
-Además se desea llevar un registro fácilmente accesible de los alumnos graduados, es decir alumnos que hayan promocionado 12avo grado.
 
 Se deben especificar las siguientes operaciones:
 
@@ -98,19 +96,37 @@ Se deben especificar las siguientes operaciones:
   
   \item \textbf{Cerrar inscripción}: la inscripción actual es cerrada correspondientemente a si cumplió o no los requisitos para promocionar de grado
   
-  \item \textbf{Consultar repitencia}: se desea consultar si un alumno repitió el último grado que haya cursado
+  \item \textbf{Consultar graduado}: se desea consultar si un alumno se graduó
 \end{enumerate}
 
-Se asume que se registrará el historial completo del alumno, empezando siempre desde primer grado hasta que finalice.
 Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
-Se quieren saber todos los estados que fueron registrados en cada legajo, por lo tanto cada uno es inmutable, si un alumno repite se produce un nuevo registro con estado \textbf{Inscripto} en el mismo grado y si promociona se registra nuevamente con el estado \textbf{Promueve}.
-
-\textbf{Nota:} Esto quizás es demasiado para el enunciado, mucho puede moverse a los comentarios entre los esquemas más abajo
 
 \section*{Designaciones}
 
 \section*{Especificación en Z}
 \input{misestudiantes.tex}
 
+\section*{Setlog}
 
+\section*{Demostraciones Z/Eves}
+\begin{theorem}{InscribirAlumnoPI}
+  InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
+\end{theorem}
+
+\begin{zproof}[InscribirAlumnoPI]
+  invoke InscribirAlumno;
+  split InscribirAlumnoOk;
+  simplify;
+  cases;
+  invoke InscribirAlumnoOk;
+  invoke InscripcionesInv;
+  equality substitute;
+  reduce;
+  next;
+  invoke InscribirAlumnoRegistradoE;
+  invoke \Xi MisEstudiantes;
+  reduce;
+  next;
+\end{zproof}
 \end{document}
+
