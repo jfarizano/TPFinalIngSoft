@@ -1,0 +1,16 @@
+loadspec misestudiantes.tex
+selop ReinscribirAlumno
+genalltt
+
+addtactic ReinscribirAlumno_DNF_1 SP \oplus inscripciones \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 + 1 , inscripto ) \}
+addtactic ReinscribirAlumno_DNF_1 SP \in alumno? \in registrados
+
+addtactic ReinscribirAlumno_DNF_2 SP \oplus inscripciones \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , inscripto ) \}
+addtactic ReinscribirAlumno_DNF_2 SP \in alumno? \in registrados
+
+addtactic ReinscribirAlumno_DNF_3 SP \in alumno? \in registrados
+
+addtactic ReinscribirAlumno_DNF_4 SP \in alumno? \in registrados
+
+addtactic ReinscribirAlumno_DNF_5 SP \notin alumno? \notin registrados
+

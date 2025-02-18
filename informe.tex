@@ -108,7 +108,7 @@ Para simplificar no diferenciamos entre primaria y secundaria, registramos desde
 
 \section*{Setlog}
 
-\section*{Demostraciones Z/Eves}
+\section*{Demostración en Z/Eves}
 \begin{theorem}{InscribirAlumnoPI}
   InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
 \end{theorem}
@@ -128,5 +128,426 @@ Para simplificar no diferenciamos entre primaria y secundaria, registramos desde
   reduce;
   next;
 \end{zproof}
-\end{document}
 
+\section*{Generación de casos de prueba con Fastest}
+
+\begin{schema}{ReinscribirAlumno\_ VIS}\\
+ registrados : \power ALUMNO \\
+ inscripciones : ALUMNO \pfun ( GRADO \cross ESTADO ) \\
+ alumno? : ALUMNO 
+\where
+ ( alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 < 12 \\
+ ( inscripciones~alumno? ) . 2 = promueve ) \lor ( alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 \leq 12 \\
+ ( inscripciones~alumno? ) . 2 = repite ) \lor ( alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 = 12 \\
+ ( inscripciones~alumno? ) . 2 = promueve ) \lor ( alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 2 = inscripto ) \lor alumno? \notin registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ DNF\_ 1}\\
+ ReinscribirAlumno\_ VIS 
+\where
+ alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 < 12 \\
+ ( inscripciones~alumno? ) . 2 = promueve
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 34}\\
+ ReinscribirAlumno\_ DNF\_ 1 
+\where
+ inscripciones \neq \{ \} \\
+ \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \neq \{ \} \\
+ \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 45}\\
+ ReinscribirAlumno\_ SP\_ 34 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 46}\\
+ ReinscribirAlumno\_ SP\_ 34 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 35}\\
+ ReinscribirAlumno\_ DNF\_ 1 
+\where
+ inscripciones \neq \{ \} \\
+ \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \neq \{ \} \\
+ \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \subset \dom inscripciones
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 47}\\
+ ReinscribirAlumno\_ SP\_ 35 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 48}\\
+ ReinscribirAlumno\_ SP\_ 35 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ DNF\_ 2}\\
+ ReinscribirAlumno\_ VIS 
+\where
+ alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 \leq 12 \\
+ ( inscripciones~alumno? ) . 2 = repite
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 10}\\
+ ReinscribirAlumno\_ DNF\_ 2 
+\where
+ inscripciones \neq \{ \} \\
+ \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \neq \{ \} \\
+ \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 21}\\
+ ReinscribirAlumno\_ SP\_ 10 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 22}\\
+ ReinscribirAlumno\_ SP\_ 10 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 11}\\
+ ReinscribirAlumno\_ DNF\_ 2 
+\where
+ inscripciones \neq \{ \} \\
+ \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \neq \{ \} \\
+ \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \subset \dom inscripciones
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 23}\\
+ ReinscribirAlumno\_ SP\_ 11 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 24}\\
+ ReinscribirAlumno\_ SP\_ 11 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ DNF\_ 3}\\
+ ReinscribirAlumno\_ VIS 
+\where
+ alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 1 = 12 \\
+ ( inscripciones~alumno? ) . 2 = promueve
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 5}\\
+ ReinscribirAlumno\_ DNF\_ 3 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 6}\\
+ ReinscribirAlumno\_ DNF\_ 3 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ DNF\_ 4}\\
+ ReinscribirAlumno\_ VIS 
+\where
+ alumno? \in registrados \\
+ ( inscripciones~alumno? ) . 2 = inscripto
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 3}\\
+ ReinscribirAlumno\_ DNF\_ 4 
+\where
+ registrados = \{ alumno? \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 4}\\
+ ReinscribirAlumno\_ DNF\_ 4 
+\where
+ registrados \neq \{ alumno? \} \\
+ alumno? \in registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ DNF\_ 5}\\
+ ReinscribirAlumno\_ VIS 
+\where
+ alumno? \notin registrados
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 1}\\
+ ReinscribirAlumno\_ DNF\_ 5 
+\where
+ registrados = \{ \}
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 2}\\
+ ReinscribirAlumno\_ DNF\_ 5 
+\where
+ registrados \neq \{ \}
+\end{schema}
+
+\begin{verbatim}
+ReinscribirAlumno_VIS
+  !______ReinscribirAlumno_DNF_1
+  |	 !______ReinscribirAlumno_SP_31
+  |	 |	 !______ReinscribirAlumno_SP_39
+  |	 |	 !______ReinscribirAlumno_SP_40
+  |	 |
+  |	 !______ReinscribirAlumno_SP_32
+  |	 |	 !______ReinscribirAlumno_SP_41
+  |	 |	 !______ReinscribirAlumno_SP_42
+  |	 |
+  |	 !______ReinscribirAlumno_SP_33
+  |	 |	 !______ReinscribirAlumno_SP_43
+  |	 |	 !______ReinscribirAlumno_SP_44
+  |	 |
+  |	 !______ReinscribirAlumno_SP_34
+  |	 |	 !______ReinscribirAlumno_SP_45
+  |	 |	 !______ReinscribirAlumno_SP_46
+  |	 |
+  |	 !______ReinscribirAlumno_SP_35
+  |	 |	 !______ReinscribirAlumno_SP_47
+  |	 |	 !______ReinscribirAlumno_SP_48
+  |	 |
+  |	 !______ReinscribirAlumno_SP_36
+  |	 |	 !______ReinscribirAlumno_SP_49
+  |	 |	 !______ReinscribirAlumno_SP_50
+  |	 |
+  |	 !______ReinscribirAlumno_SP_37
+  |	 |	 !______ReinscribirAlumno_SP_51
+  |	 |	 !______ReinscribirAlumno_SP_52
+  |	 |
+  |	 !______ReinscribirAlumno_SP_38
+  |	 	 !______ReinscribirAlumno_SP_53
+  |	 	 !______ReinscribirAlumno_SP_54
+  |	
+  |
+  !______ReinscribirAlumno_DNF_2
+  |	 !______ReinscribirAlumno_SP_7
+  |	 |	 !______ReinscribirAlumno_SP_15
+  |	 |	 !______ReinscribirAlumno_SP_16
+  |	 |
+  |	 !______ReinscribirAlumno_SP_8
+  |	 |	 !______ReinscribirAlumno_SP_17
+  |	 |	 !______ReinscribirAlumno_SP_18
+  |	 |
+  |	 !______ReinscribirAlumno_SP_9
+  |	 |	 !______ReinscribirAlumno_SP_19
+  |	 |	 !______ReinscribirAlumno_SP_20
+  |	 |
+  |	 !______ReinscribirAlumno_SP_10
+  |	 |	 !______ReinscribirAlumno_SP_21
+  |	 |	 !______ReinscribirAlumno_SP_22
+  |	 |
+  |	 !______ReinscribirAlumno_SP_11
+  |	 |	 !______ReinscribirAlumno_SP_23
+  |	 |	 !______ReinscribirAlumno_SP_24
+  |	 |
+  |	 !______ReinscribirAlumno_SP_12
+  |	 |	 !______ReinscribirAlumno_SP_25
+  |	 |	 !______ReinscribirAlumno_SP_26
+  |	 |
+  |	 !______ReinscribirAlumno_SP_13
+  |	 |	 !______ReinscribirAlumno_SP_27
+  |	 |	 !______ReinscribirAlumno_SP_28
+  |	 |
+  |	 !______ReinscribirAlumno_SP_14
+  |	 	 !______ReinscribirAlumno_SP_29
+  |	 	 !______ReinscribirAlumno_SP_30
+  |	
+  |
+  !______ReinscribirAlumno_DNF_3
+  |	 !______ReinscribirAlumno_SP_5
+  |	 !______ReinscribirAlumno_SP_6
+  |
+  !______ReinscribirAlumno_DNF_4
+  |	 !______ReinscribirAlumno_SP_3
+  |	 !______ReinscribirAlumno_SP_4
+  |
+  !______ReinscribirAlumno_DNF_5
+  	 !______ReinscribirAlumno_SP_1
+  	 !______ReinscribirAlumno_SP_2
+\end{verbatim}
+
+\begin{verbatim}
+ReinscribirAlumno_VIS
+  !______ReinscribirAlumno_DNF_1
+  |	 !______ReinscribirAlumno_SP_34
+  |	 |	 !______ReinscribirAlumno_SP_45
+  |	 |	 |	 !______ReinscribirAlumno_SP_45_TCASE
+  |	 |	 |
+  |	 |	 !______ReinscribirAlumno_SP_46
+  |	 |	 	 !______ReinscribirAlumno_SP_46_TCASE
+  |	 |	
+  |	 |
+  |	 !______ReinscribirAlumno_SP_35
+  |	 	 !______ReinscribirAlumno_SP_47
+  |	 	 |	 !______ReinscribirAlumno_SP_47_TCASE
+  |	 	 |
+  |	 	 !______ReinscribirAlumno_SP_48
+  |	 	 	 !______ReinscribirAlumno_SP_48_TCASE
+  |	 	
+  |	
+  |
+  !______ReinscribirAlumno_DNF_2
+  |	 !______ReinscribirAlumno_SP_10
+  |	 |	 !______ReinscribirAlumno_SP_21
+  |	 |	 |	 !______ReinscribirAlumno_SP_21_TCASE
+  |	 |	 |
+  |	 |	 !______ReinscribirAlumno_SP_22
+  |	 |	 	 !______ReinscribirAlumno_SP_22_TCASE
+  |	 |	
+  |	 |
+  |	 !______ReinscribirAlumno_SP_11
+  |	 	 !______ReinscribirAlumno_SP_23
+  |	 	 |	 !______ReinscribirAlumno_SP_23_TCASE
+  |	 	 |
+  |	 	 !______ReinscribirAlumno_SP_24
+  |	 	 	 !______ReinscribirAlumno_SP_24_TCASE
+  |	 	
+  |	
+  |
+  !______ReinscribirAlumno_DNF_3
+  |	 !______ReinscribirAlumno_SP_5
+  |	 |	 !______ReinscribirAlumno_SP_5_TCASE
+  |	 |
+  |	 !______ReinscribirAlumno_SP_6
+  |	 	 !______ReinscribirAlumno_SP_6_TCASE
+  |	
+  |
+  !______ReinscribirAlumno_DNF_4
+  |	 !______ReinscribirAlumno_SP_3
+  |	 |	 !______ReinscribirAlumno_SP_3_TCASE
+  |	 |
+  |	 !______ReinscribirAlumno_SP_4
+  |	 	 !______ReinscribirAlumno_SP_4_TCASE
+  |	
+  |
+  !______ReinscribirAlumno_DNF_5
+  	 !______ReinscribirAlumno_SP_1
+  	 |	 !______ReinscribirAlumno_SP_1_TCASE
+  	 |
+  	 !______ReinscribirAlumno_SP_2
+  	 	 !______ReinscribirAlumno_SP_2_TCASE
+\end{verbatim}
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 45\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 45
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 46\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 46
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 47\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 47
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 48\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 48
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 21\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 21
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 22\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 22
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 23\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 23
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 24\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 24
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 5\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 5
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 6\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 6
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 3\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 3
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 4\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 4
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 1\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 1 
+\where
+ registrados =~\emptyset \\
+ inscripciones =~\emptyset \\
+ alumno? = aLUMNO1
+\end{schema}
+
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 2\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 2 
+\where
+ registrados = \{ aLUMNO1 \} \\
+ inscripciones =~\emptyset \\
+ alumno? = aLUMNO1
+\end{schema}
+
+\end{document}
