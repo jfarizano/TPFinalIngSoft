@@ -54,8 +54,8 @@
   \begin{center}
     
     % Title
-    {\huge \textbf{Verificación de sofware} \\[0.4cm]}
-    {\large Verificación de un sistema bla bla} \\
+    {\huge \textbf{Verificación de software} \\[0.4cm]}
+    {\large Trabajo Práctico Final - Ingeniería de Software II} \\
     \noindent
     
     \vfill
@@ -66,7 +66,6 @@
   
     \vfill
     % Bottom of the page
-    Trabajo Práctico Final - Ingeniería de Software II \\
     Departamento de Ciencias de la Computaci\'on\\
     Facultad de Ciencias Exactas, Ingenier\'ia y Agrimensura\\
     Universidad Nacional de Rosario \\
@@ -75,9 +74,8 @@
   \end{center}
   \end{titlepage}
 
-\section*{El problema}
+\section{Enunciado del problema}
 Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
-
 
 Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno puede encontrarse en una de las siguientes situaciones:
 
@@ -92,23 +90,142 @@ Se deben especificar las siguientes operaciones:
 \begin{enumerate}
   \item \textbf{Inscribir alumno}: se inscribe por primera vez a un alumno a primer grado
   
-  \item \textbf{Reinscribir alumno}: se inscribe un alumno pre-existente al grado que corresponda según su último estado de inscripción
+  \item \textbf{Reinscribir alumno}: se inscribe un alumno previamente registrado al grado que corresponda según su último estado de inscripción
   
-  \item \textbf{Cerrar inscripción}: la inscripción actual es cerrada correspondientemente a si cumplió o no los requisitos para promocionar de grado
+  \item \textbf{Cerrar inscripción}: la inscripción actual es cerrada y se registra una promoción o repitencia
   
   \item \textbf{Consultar graduado}: se desea consultar si un alumno se graduó
 \end{enumerate}
 
 Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
 
-\section*{Designaciones}
+\section{Designaciones}
 
-\section*{Especificación en Z}
+\begin{designations}
+  \desig{$alumno$ es un alumno}{alumno \in ALUMNO}
+  \desig{$grado$ es un grado correspondiente a un año escolar}{grado \in GRADO}
+  \desig{$estado$ es un estado de inscripción}{estado \in ESTADO}
+  \desig{$rep$ es un mensaje de respuesta}{rep \in REP}
+  \desig{Estado de inscripción actual correspondiente al alumno $alumno$}{inscripciones(alumno)}
+\end{designations}
+
+\section{Especificación en Z}
 \input{misestudiantes.tex}
 
-\section*{Setlog}
+\section{\{log\}}
+La traducción de la especificación Z a un programa \emph{\{log\}} se puede encontrar en el archivo \textbf{misestudiantes.pl}, para ejecutar este programa no es necesario consultar ninguna librería.
 
-\section*{Demostración en Z/Eves}
+\subsection*{Simulaciones}
+Para realizar las siguientes simulaciones se cargó el programa con el type checker activado y una vez verificado que el programa tipa correctamente se desactivó para simplificar la ejecución de las simulaciones.
+
+\subsubsection*{Primera simulación}
+\begin{verbatim}
+misEstudiantesInicial(R0, I0) & 
+inscribirAlumno(R0, I0, pepe, R1, I1) & 
+cerrarInscripcion(R1, I1, pepe, promueve, R2, I2) & 
+reinscribirAlumno(R2, I2, pepe, R3, I3) & 
+cerrarInscripcion(R3, I3, pepe, repite, R4, I4) & 
+cerrarInscripcion(R4, I4, pepe, promueve, R5, I5) & 
+inscribirAlumno(R5, I5, pepe, R6, I6) & 
+alumnoEsGraduado(R6, I6, pepe, Rep1, R6, I6) & 
+alumnoEsGraduado(R6, I6, pepito, Rep2, R6, I6).
+\end{verbatim}
+
+El objetivo de esta simulación es probar los usos habituales del programa, comenzando
+desde el estado inicial se inscribe un alumno \emph{Pepe} se da una serie de inscripciones cerradas y reinscripciones, incluso una ocasión donde se cerró una inscripción como repitente y luego se modificó a promoción (por ejemplo, el alumno puede haber recuperado materias luego del cierre o se corrigió una equivocación al cerrar por primera vez). Además se consulta si \emph{Pepe} está graduado después de promover segundo grado, lo cual no sería posible, y por último se consulta por un alumno que no se encuentra registrado.
+
+\begin{verbatim}
+R0 = {},  
+I0 = {},  
+R1 = {pepe},  
+I1 = {[pepe,[1,inscripto]]},  
+R2 = {pepe},  
+I2 = {[pepe,[1,promueve]]},  
+R3 = {pepe},  
+I3 = {[pepe,[2,inscripto]]},  
+R4 = {pepe},  
+I4 = {[pepe,[2,repite]]},  
+R5 = {pepe},  
+I5 = {[pepe,[2,promueve]]},  
+R6 = {pepe},  
+I6 = {[pepe,[2,promueve]]},  
+Rep1 = alumnoNoEsGraduado,  
+Rep2 = alumnoNoEncontrado
+\end{verbatim}
+
+Los resultados cumplen lo esperado.
+
+\subsubsection*{Segunda simulación}
+\begin{verbatim}
+misEstudiantesInicial(R0, I0) &
+inscribirAlumno(R0, I0, pepe, R1, I1) &
+cerrarInscripcion(R1, I1, pepe, promueve, R2, I2) &
+reinscribirAlumno(R2, I2, pepe, R3, I3) &
+cerrarInscripcion(R3, I3, pepe, promueve, R4, I4) &
+reinscribirAlumno(R4, I4, pepe, R5, I5) &
+cerrarInscripcion(R5, I5, pepe, promueve, R6, I6) &
+reinscribirAlumno(R6, I6, pepe, R7, I7) &
+cerrarInscripcion(R7, I7, pepe, promueve, R8, I8) &
+reinscribirAlumno(R8, I8, pepe, R9, I9) &
+cerrarInscripcion(R9, I9, pepe, promueve, R10, I10) &
+reinscribirAlumno(R10, I10, pepe, R11, I11) &
+cerrarInscripcion(R11, I11, pepe, promueve, R12, I12) &
+reinscribirAlumno(R12, I12, pepe, R13, I13) &
+cerrarInscripcion(R13, I13, pepe, promueve, R14, I14) &
+reinscribirAlumno(R14, I14, pepe, R15, I15) &
+cerrarInscripcion(R15, I15, pepe, promueve, R16, I16) &
+reinscribirAlumno(R16, I16, pepe, R17, I17) &
+cerrarInscripcion(R17, I17, pepe, promueve, R18, I18) &
+reinscribirAlumno(R18, I18, pepe, R19, I19) &
+cerrarInscripcion(R19, I19, pepe, promueve, R20, I20) &
+reinscribirAlumno(R20, I20, pepe, R21, I21) &
+cerrarInscripcion(R21, I21, pepe, promueve, R22, I22) &
+reinscribirAlumno(R22, I22, pepe, R23, I23) &
+alumnoEsGraduado(R23, I23, pepe, Rep1, R23, I23) &
+cerrarInscripcion(R23, I23, pepe, promueve, R24, I24) &
+alumnoEsGraduado(R24, I24, pepe, Rep2, R24, I24) &
+reinscribirAlumno(R24, I24, pepe, R25, I25) &
+alumnoEsGraduado(R25, I25, pepe, Rep3, R25, I25) &
+cerrarInscripcion(R25, I25, pepe, repite, R26, I26) &
+alumnoEsGraduado(R26, I26, pepe, Rep4, R26, I26).
+\end{verbatim}
+
+Esta segunda simulación es más extensa pero consiste en inscribir al alumno \emph{Pepe} partiendo del estado inicial y realizar el ciclo cerrar inscripción/reinscribir hasta que se encuentre cursando el último grado, una vez aquí se consulta si está graduado a lo que se debería obtener una respuesta negativa, se cierra la inscripción para graduarlo, se consulta de nuevo y el resultado esta vez debería ser positivo. Luego, se intenta reinscribir al alumno graduado pero esto no es permitido, por lo que consultando de nuevo se debería ver que mantiene su estado de graduado, el cual solo es perdido cuando se decide modificar el estado del último cierre de inscripción por una repitencia, y consultado por última vez, el resultado sería negativo.
+
+\begin{verbatim}
+R0 = {},  
+I0 = {},  
+R1 = {pepe},  
+I1 = {[pepe,[1,inscripto]]},  
+R2 = {pepe},  
+I2 = {[pepe,[1,promueve]]},  
+.
+.
+.
+I22 = {[pepe,[11,promueve]]},  
+R23 = {pepe},  
+I23 = {[pepe,[12,inscripto]]},  
+Rep1 = alumnoNoEsGraduado,  
+R24 = {pepe},  
+I24 = {[pepe,[12,promueve]]},  
+Rep2 = alumnoEsGraduado,  
+R25 = {pepe},  
+I25 = {[pepe,[12,promueve]]},  
+Rep3 = alumnoEsGraduado,  
+R26 = {pepe},  
+I26 = {[pepe,[12,repite]]},  
+Rep4 = alumnoNoEsGraduado
+\end{verbatim}
+
+Los resultados fueron acortados ya que contaban con muchos estados intermedios similares. Estos resultados cumplen con lo esperados.
+
+\subsection*{Demostración automática de propiedades}
+Invocando el generador de condiciones de verificación (VCG) con el comando \emph{vcg('misestudiantes.pl').} es generado el archivo \textbf{misestudiantes-vc.pl}, consultando este archivo y ejecutando el comando \emph{check\_vcs\_misestudiantes.} es posible descargar las condiciones de verificación.
+
+En un principio todas las condiciones son verificadas correctamente excepto por la condición \textbf{inscribirAlumno\_pi\_inscripcionesPfunInv}, por lo cual fue necesario agregar la hipótesis \textbf{inscripcionesInv(Registrados, Inscripciones)} y luego esta condición fue descargada exitosamente. No fue necesario utilizar el comando \emph{findh.}
+
+\section{Demostración de preservación de invariantes en Z/Eves}
+Utilizando la interfaz gráfica de \emph{Z/Eves} se definió y demostró el teorema \textbf{InscribirAlumnoPI} el cual verifica que la operación \textbf{InscribirAlumno} preserva el invariante de estado \textbf{InscripcionesInv}.
 \begin{theorem}{InscribirAlumnoPI}
   InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
 \end{theorem}
@@ -129,274 +246,45 @@ Para simplificar no diferenciamos entre primaria y secundaria, registramos desde
   next;
 \end{zproof}
 
-\section*{Generación de casos de prueba con Fastest}
+\section{Generación de casos de prueba con Fastest}
+Utilizando Fastest se generarán casos de prueba para la operación \emph{ReinscribirAlummno}, los comandos ejecutados para generar los casos de prueba fueron los siguientes:
 
-\begin{schema}{ReinscribirAlumno\_ VIS}\\
- registrados : \power ALUMNO \\
- inscripciones : ALUMNO \pfun ( GRADO \cross ESTADO ) \\
- alumno? : ALUMNO 
-\where
- ( alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 < 12 \\
- ( inscripciones~alumno? ) . 2 = promueve ) \lor ( alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 \leq 12 \\
- ( inscripciones~alumno? ) . 2 = repite ) \lor ( alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 = 12 \\
- ( inscripciones~alumno? ) . 2 = promueve ) \lor ( alumno? \in registrados \\
- ( inscripciones~alumno? ) . 2 = inscripto ) \lor alumno? \notin registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ DNF\_ 1}\\
- ReinscribirAlumno\_ VIS 
-\where
- alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 < 12 \\
- ( inscripciones~alumno? ) . 2 = promueve
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 34}\\
- ReinscribirAlumno\_ DNF\_ 1 
-\where
- inscripciones \neq \{ \} \\
- \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \neq \{ \} \\
- \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 45}\\
- ReinscribirAlumno\_ SP\_ 34 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 46}\\
- ReinscribirAlumno\_ SP\_ 34 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 35}\\
- ReinscribirAlumno\_ DNF\_ 1 
-\where
- inscripciones \neq \{ \} \\
- \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \neq \{ \} \\
- \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 + 1 , inscripto ) \} \subset \dom inscripciones
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 47}\\
- ReinscribirAlumno\_ SP\_ 35 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 48}\\
- ReinscribirAlumno\_ SP\_ 35 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ DNF\_ 2}\\
- ReinscribirAlumno\_ VIS 
-\where
- alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 \leq 12 \\
- ( inscripciones~alumno? ) . 2 = repite
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 10}\\
- ReinscribirAlumno\_ DNF\_ 2 
-\where
- inscripciones \neq \{ \} \\
- \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \neq \{ \} \\
- \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 21}\\
- ReinscribirAlumno\_ SP\_ 10 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 22}\\
- ReinscribirAlumno\_ SP\_ 10 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 11}\\
- ReinscribirAlumno\_ DNF\_ 2 
-\where
- inscripciones \neq \{ \} \\
- \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \neq \{ \} \\
- \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , inscripto ) \} \subset \dom inscripciones
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 23}\\
- ReinscribirAlumno\_ SP\_ 11 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 24}\\
- ReinscribirAlumno\_ SP\_ 11 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ DNF\_ 3}\\
- ReinscribirAlumno\_ VIS 
-\where
- alumno? \in registrados \\
- ( inscripciones~alumno? ) . 1 = 12 \\
- ( inscripciones~alumno? ) . 2 = promueve
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 5}\\
- ReinscribirAlumno\_ DNF\_ 3 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 6}\\
- ReinscribirAlumno\_ DNF\_ 3 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ DNF\_ 4}\\
- ReinscribirAlumno\_ VIS 
-\where
- alumno? \in registrados \\
- ( inscripciones~alumno? ) . 2 = inscripto
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 3}\\
- ReinscribirAlumno\_ DNF\_ 4 
-\where
- registrados = \{ alumno? \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 4}\\
- ReinscribirAlumno\_ DNF\_ 4 
-\where
- registrados \neq \{ alumno? \} \\
- alumno? \in registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ DNF\_ 5}\\
- ReinscribirAlumno\_ VIS 
-\where
- alumno? \notin registrados
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 1}\\
- ReinscribirAlumno\_ DNF\_ 5 
-\where
- registrados = \{ \}
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 2}\\
- ReinscribirAlumno\_ DNF\_ 5 
-\where
- registrados \neq \{ \}
-\end{schema}
+\begin{verbatim}
+loadspec misestudiantes.tex
+selop ReinscribirAlumno
+genalltt
+addtactic ReinscribirAlumno_DNF_1 SP \oplus inscripciones \oplus 
+  \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 + 1 , inscripto ) \}
+addtactic ReinscribirAlumno_DNF_2 SP \oplus inscripciones \oplus 
+  \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , inscripto ) \}
+addtactic ReinscribirAlumno_DNF_3 SP \in alumno? \in registrados
+addtactic ReinscribirAlumno_DNF_4 SP \in alumno? \in registrados
+addtactic ReinscribirAlumno_DNF_5 SP \notin alumno? \notin registrados
+genalltt
+genalltca
+\end{verbatim}
 
 \begin{verbatim}
 ReinscribirAlumno_VIS
   !______ReinscribirAlumno_DNF_1
-  |	 !______ReinscribirAlumno_SP_31
-  |	 |	 !______ReinscribirAlumno_SP_39
-  |	 |	 !______ReinscribirAlumno_SP_40
-  |	 |
-  |	 !______ReinscribirAlumno_SP_32
-  |	 |	 !______ReinscribirAlumno_SP_41
-  |	 |	 !______ReinscribirAlumno_SP_42
-  |	 |
-  |	 !______ReinscribirAlumno_SP_33
-  |	 |	 !______ReinscribirAlumno_SP_43
-  |	 |	 !______ReinscribirAlumno_SP_44
-  |	 |
-  |	 !______ReinscribirAlumno_SP_34
-  |	 |	 !______ReinscribirAlumno_SP_45
-  |	 |	 !______ReinscribirAlumno_SP_46
-  |	 |
-  |	 !______ReinscribirAlumno_SP_35
-  |	 |	 !______ReinscribirAlumno_SP_47
-  |	 |	 !______ReinscribirAlumno_SP_48
-  |	 |
-  |	 !______ReinscribirAlumno_SP_36
-  |	 |	 !______ReinscribirAlumno_SP_49
-  |	 |	 !______ReinscribirAlumno_SP_50
-  |	 |
-  |	 !______ReinscribirAlumno_SP_37
-  |	 |	 !______ReinscribirAlumno_SP_51
-  |	 |	 !______ReinscribirAlumno_SP_52
-  |	 |
-  |	 !______ReinscribirAlumno_SP_38
-  |	 	 !______ReinscribirAlumno_SP_53
-  |	 	 !______ReinscribirAlumno_SP_54
-  |	
+  |	 !______ReinscribirAlumno_SP_15
+  |	 !______ReinscribirAlumno_SP_16
+  |	 !______ReinscribirAlumno_SP_17
+  |	 !______ReinscribirAlumno_SP_18
+  |	 !______ReinscribirAlumno_SP_19
+  |	 !______ReinscribirAlumno_SP_20
+  |	 !______ReinscribirAlumno_SP_21
+  |	 !______ReinscribirAlumno_SP_22
   |
   !______ReinscribirAlumno_DNF_2
   |	 !______ReinscribirAlumno_SP_7
-  |	 |	 !______ReinscribirAlumno_SP_15
-  |	 |	 !______ReinscribirAlumno_SP_16
-  |	 |
   |	 !______ReinscribirAlumno_SP_8
-  |	 |	 !______ReinscribirAlumno_SP_17
-  |	 |	 !______ReinscribirAlumno_SP_18
-  |	 |
   |	 !______ReinscribirAlumno_SP_9
-  |	 |	 !______ReinscribirAlumno_SP_19
-  |	 |	 !______ReinscribirAlumno_SP_20
-  |	 |
   |	 !______ReinscribirAlumno_SP_10
-  |	 |	 !______ReinscribirAlumno_SP_21
-  |	 |	 !______ReinscribirAlumno_SP_22
-  |	 |
   |	 !______ReinscribirAlumno_SP_11
-  |	 |	 !______ReinscribirAlumno_SP_23
-  |	 |	 !______ReinscribirAlumno_SP_24
-  |	 |
   |	 !______ReinscribirAlumno_SP_12
-  |	 |	 !______ReinscribirAlumno_SP_25
-  |	 |	 !______ReinscribirAlumno_SP_26
-  |	 |
   |	 !______ReinscribirAlumno_SP_13
-  |	 |	 !______ReinscribirAlumno_SP_27
-  |	 |	 !______ReinscribirAlumno_SP_28
-  |	 |
   |	 !______ReinscribirAlumno_SP_14
-  |	 	 !______ReinscribirAlumno_SP_29
-  |	 	 !______ReinscribirAlumno_SP_30
-  |	
   |
   !______ReinscribirAlumno_DNF_3
   |	 !______ReinscribirAlumno_SP_5
@@ -411,42 +299,24 @@ ReinscribirAlumno_VIS
   	 !______ReinscribirAlumno_SP_2
 \end{verbatim}
 
+asdasdadasdsad
+
 \begin{verbatim}
 ReinscribirAlumno_VIS
   !______ReinscribirAlumno_DNF_1
-  |	 !______ReinscribirAlumno_SP_34
-  |	 |	 !______ReinscribirAlumno_SP_45
-  |	 |	 |	 !______ReinscribirAlumno_SP_45_TCASE
-  |	 |	 |
-  |	 |	 !______ReinscribirAlumno_SP_46
-  |	 |	 	 !______ReinscribirAlumno_SP_46_TCASE
-  |	 |	
+  |	 !______ReinscribirAlumno_SP_18
+  |	 |	 !______ReinscribirAlumno_SP_18_TCASE
   |	 |
-  |	 !______ReinscribirAlumno_SP_35
-  |	 	 !______ReinscribirAlumno_SP_47
-  |	 	 |	 !______ReinscribirAlumno_SP_47_TCASE
-  |	 	 |
-  |	 	 !______ReinscribirAlumno_SP_48
-  |	 	 	 !______ReinscribirAlumno_SP_48_TCASE
-  |	 	
+  |	 !______ReinscribirAlumno_SP_19
+  |	 	 !______ReinscribirAlumno_SP_19_TCASE
   |	
   |
   !______ReinscribirAlumno_DNF_2
   |	 !______ReinscribirAlumno_SP_10
-  |	 |	 !______ReinscribirAlumno_SP_21
-  |	 |	 |	 !______ReinscribirAlumno_SP_21_TCASE
-  |	 |	 |
-  |	 |	 !______ReinscribirAlumno_SP_22
-  |	 |	 	 !______ReinscribirAlumno_SP_22_TCASE
-  |	 |	
+  |	 |	 !______ReinscribirAlumno_SP_10_TCASE
   |	 |
   |	 !______ReinscribirAlumno_SP_11
-  |	 	 !______ReinscribirAlumno_SP_23
-  |	 	 |	 !______ReinscribirAlumno_SP_23_TCASE
-  |	 	 |
-  |	 	 !______ReinscribirAlumno_SP_24
-  |	 	 	 !______ReinscribirAlumno_SP_24_TCASE
-  |	 	
+  |	 	 !______ReinscribirAlumno_SP_11_TCASE
   |	
   |
   !______ReinscribirAlumno_DNF_3
@@ -473,43 +343,27 @@ ReinscribirAlumno_VIS
   	 	 !______ReinscribirAlumno_SP_2_TCASE
 \end{verbatim}
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 45\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 45
+Acá explicar por qué no generó para algunas hojas del árbol de prueba
+
+\subsubsection*{Esquemas de casos de pruebas generados}
+
+\begin{schema}{ReinscribirAlumno\_ SP\_ 18\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 18
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 46\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 46
+\begin{schema}{ReinscribirAlumno\_ SP\_ 19\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 19
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 47\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 47
+\begin{schema}{ReinscribirAlumno\_ SP\_ 10\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 10
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 48\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 48
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 21\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 21
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 22\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 22
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 23\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 23
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 24\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 24
+\begin{schema}{ReinscribirAlumno\_ SP\_ 11\_ TCASE}\\
+ ReinscribirAlumno\_ SP\_ 11
 \end{schema}
 
 

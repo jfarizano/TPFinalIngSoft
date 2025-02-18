@@ -164,32 +164,15 @@ reinscribirAlumno(Registrados, Inscripciones, Alumno, Registrados_, Inscripcione
     reinscribirAlumnoGraduadoE(Registrados, Inscripciones, Alumno, Registrados_, Inscripciones_) or
     reinscribirAlumnoDobleInscripE(Registrados, Inscripciones, Alumno, Registrados_, Inscripciones_).
 
-dec_p_type(cerrarInscripcionNoGraduadoOk(alumnos, inscripciones, alumno, estado, alumnos, inscripciones)).
-cerrarInscripcionNoGraduadoOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) :-
+dec_p_type(cerrarInscripcionOk(alumnos, inscripciones, alumno, estado, alumnos, inscripciones)).
+cerrarInscripcionOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) :-
     Alumno in Registrados &
+    Estado neq inscripto &
     applyTo(Inscripciones, Alumno, I) &
     dec(I, inscripcion) &
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    (Estado = repite or (Estado = promueve & G < 12)) &
-    E = inscripto &
-    I_ = [G, Estado] &
-    dec(I_, inscripcion) &
-    oplus(Inscripciones, {[Alumno, I_]}, Inscripciones_) &
-    Registrados_ = Registrados.
-
-dec_p_type(cerrarInscripcionGraduadoOk(alumnos, inscripciones, alumno, estado, alumnos, inscripciones)).
-cerrarInscripcionGraduadoOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) :-
-    Alumno in Registrados &
-    applyTo(Inscripciones, Alumno, I) &
-    dec(I, inscripcion) &
-    [G, E] = I &
-    dec(G, grado) &
-    dec(E, estado) &
-    Estado = promueve &
-    G = 12 &
-    E = inscripto &
     I_ = [G, Estado] &
     dec(I_, inscripcion) &
     oplus(Inscripciones, {[Alumno, I_]}, Inscripciones_) &
@@ -210,8 +193,7 @@ cerrarInscripcionAlumnoNoEncontradoE(Registrados, Inscripciones, Alumno, Registr
 operation(cerrarInscripcion).
 dec_p_type(cerrarInscripcion(alumnos, inscripciones, alumno, estado, alumnos, inscripciones)).
 cerrarInscripcion(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) :-
-    cerrarInscripcionNoGraduadoOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) or
-    cerrarInscripcionGraduadoOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) or
+    cerrarInscripcionOk(Registrados, Inscripciones, Alumno, Estado, Registrados_, Inscripciones_) or
     cerrarInscripcionEstadoInvalidoE(Registrados, Inscripciones, Estado, Registrados_, Inscripciones_) or
     cerrarInscripcionAlumnoNoEncontradoE(Registrados, Inscripciones, Alumno, Registrados_, Inscripciones_).
 

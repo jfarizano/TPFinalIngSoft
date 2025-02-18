@@ -25,7 +25,7 @@
 \begin{schema}{MaximoGradoInv}
     MisEstudiantes
     \where
-    \forall a : registrados @ (inscripciones a).1 \leq 12
+    \forall alumno : registrados @ (inscripciones alumno).1 \leq 12
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
@@ -117,6 +117,7 @@
     estado?: ESTADO
     \where
     alumno? \in registrados \\
+    estado? \neq inscripto \\
     inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, estado?) \} \\
     registrados' = registrados
 \end{schema}
