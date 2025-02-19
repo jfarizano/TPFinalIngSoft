@@ -1,3 +1,0 @@
-Primera ejecucion de vcg
-Checking alumnoEsRepitente_is_sat ... ERROR
-
