@@ -27,25 +27,11 @@
 
 \setlength{\parskip}{8pt}
 
-% defining command for the curly arrow
-\newcommand{\curly}{\mathrel{\leadsto}}
-
-\DeclarePairedDelimiterX{\Iintv}[1]{\llbracket}{\rrbracket}{\iintvargs{#1}}
-\NewDocumentCommand{\iintvargs}{>{\SplitArgument{1}{,}}m}
-{\iintvargsaux#1}
-\NewDocumentCommand{\iintvargsaux}{mm} {#1\mkern1.5mu,\mkern1.5mu#2}
-
-\makeatletter
-\newcommand*{\currentname}{\@currentlabelname}
-\makeatother
-
 \addtolength{\textwidth}{0.2cm}
 \setlength{\parskip}{8pt}
 \setlength{\parindent}{0.5cm}
 \linespread{1.5}
 
-
-\renewcommand*\contentsname{\LARGE Índice}
 
 \begin{document}
 
@@ -72,23 +58,23 @@
     Rosario, Santa Fe, Argentina\\[0.4cm]
     {\large \today} 
   \end{center}
-  \end{titlepage}
+\end{titlepage}
 
 \section{Enunciado del problema}
 Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
 
-Un directivo desea inscribir o reinscribir a un alumno en su escuela. Cada alumno puede encontrarse en una de las siguientes situaciones:
+Un directivo desea inscribir o reinscribir a un alumno en su escuela. A cada alumno se le asigna una inscripción actual que consiste en un grado escolar y un estado que representa una de las tres siguientes situaciones:
 
 \begin{itemize}
   \item \textbf{Inscripto}: el alumno fue inscripto y es habilitado a cursar el grado registrado
-  \item \textbf{Promovido}: el alumno cumplió los requisitos para promocionar el grado al cual se encuentra inscripto y es habilitado a ser inscripto en el grado siguiente o a graduarse si se encontraba en el 12avo grado
+  \item \textbf{Promovido}: el alumno cumplió los requisitos para promocionar el grado al cual se encuentra inscripto y es habilitado a ser inscripto en el grado siguiente, o a graduarse si se encontraba en el 12avo grado
   \item \textbf{Repitente}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
 
 Se deben especificar las siguientes operaciones:
 
 \begin{enumerate}
-  \item \textbf{Inscribir alumno}: se inscribe por primera vez a un alumno a primer grado
+  \item \textbf{Inscribir alumno}: se registra por primera vez a un alumno y se lo inscribe a primer grado
   
   \item \textbf{Reinscribir alumno}: se inscribe un alumno previamente registrado al grado que corresponda según su último estado de inscripción
   
@@ -97,10 +83,11 @@ Se deben especificar las siguientes operaciones:
   \item \textbf{Consultar graduado}: se desea consultar si un alumno se graduó
 \end{enumerate}
 
-Para simplificar no diferenciamos entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
+No se diferencia entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
 
-\section{Designaciones}
+\section{Especificación en Z}
 
+Para comenzar, damos las designaciones:
 \begin{designations}
   \desig{$alumno$ es un alumno}{alumno \in ALUMNO}
   \desig{$grado$ es un grado correspondiente a un año escolar}{grado \in GRADO}
@@ -109,13 +96,203 @@ Para simplificar no diferenciamos entre primaria y secundaria, registramos desde
   \desig{Estado de inscripción actual correspondiente al alumno $alumno$}{inscripciones(alumno)}
 \end{designations}
 
-\section{Especificación en Z}
-\input{misestudiantes.tex}
+Luego, definimos los tipos básicos y enumerados utilizados:
+\begin{zed}
+  [ALUMNO] \\
+  GRADO == \nat \\
+  ESTADO ::= inscripto | promueve | repite \\
+  REP ::= alumnoEsGraduado | alumnoNoEsGraduado | alumnoNoEncontrado
+\end{zed}
+
+Además, damos la siguiente definición axiomática que define el último grado que debe cursar y promocionar un alumno para graduarse:
+\begin{axdef}
+    maximoGrado : GRADO
+\where
+    maximoGrado = 12
+\end{axdef}
+
+Definimos nuestro estado, donde \emph{registrados} es el conjunto de alumnos que fueron registrados en el sistema, e \emph{inscripciones} es la asignación de cada alumno a su inscripción actual, siendo esta una tupla compuesta por un grado y un estado de inscripción según lo requerido.
+\begin{schema}{MisEstudiantes}
+  registrados: \power ALUMNO \\
+  inscripciones: ALUMNO \pfun (GRADO \cross ESTADO)
+\end{schema}
+
+Definimos dos invariantes de estado. La primera indica que todos los alumnos registrados en el sistema deben tener un estado de inscripción actual y viceversa.
+\begin{schema}{InscripcionesInv}
+  MisEstudiantes
+  \where
+  \dom inscripciones = registrados
+\end{schema}
+
+La segunda invariante representa que para todo alumno registrado su grado de inscripción no debe superar el máximo grado posible.
+\begin{schema}{MaximoGradoInv}
+    MisEstudiantes
+    \where
+    \forall alumno : registrados @ (inscripciones \; alumno).1 \leq maximoGrado
+\end{schema}
+
+Definimos el estado inicial del sistema:
+\begin{schema}{MisEstudiantesInicial}
+    MisEstudiantes
+    \where
+    registrados = \emptyset \\
+    inscripciones = \emptyset
+\end{schema}
+
+La primera operación a especificar es \emph{InscribirAlumno}. En el caso exitoso se debe dar la condición de que el alumno especificado no se encuentre registrado en el sistema, luego se lo registra y se los inscribe a primer grado.
+\begin{schema}{InscribirAlumnoOk}
+    \Delta MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \notin registrados \\
+    inscripciones' = inscripciones \cup \{alumno? \mapsto (1, inscripto) \} \\
+    registrados' = registrados \cup \{alumno?\}
+\end{schema}
+
+El único caso de error de esta operación se da cuando el alumno ya se encontraba registrado en el sistema.
+\begin{schema}{InscribirAlumnoRegistradoE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \in registrados
+\end{schema}
+
+\begin{zed}
+    InscribirAlumno == InscribirAlumnoOk \lor InscribirAlumnoRegistradoE
+\end{zed}
+
+La siguiente operación a modelar es \emph{ReinscribirAlumno}, esta cuenta con dos casos exitosos. El primero se da cuando el alumno se encuentra en estado de promoción y se lo inscribe en el siguiente grado a menos que haya promovido el último grado; el segundo caso exitoso se da cuando el alumno se encuentra en estado de repitencia y se lo debe inscribir en el mismo grado que se encontraba.
+\begin{schema}{ReinscribirAlumnoPromovidoOk}
+    \Delta MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \in registrados \\
+    (inscripciones \; alumno?).1 < maximoGrado \\ 
+    (inscripciones \; alumno?).2 = promueve \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1 + 1, inscripto) \} \\
+    registrados' = registrados
+\end{schema}
+
+\begin{schema}{ReinscribirAlumnoRepitenteOk}
+    \Delta MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \in registrados \\
+    (inscripciones \; alumno?).1 \leq maximoGrado \\ 
+    (inscripciones \; alumno?).2 = repite \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1, inscripto) \} \\
+    registrados' = registrados
+\end{schema}
+
+Los casos de error posibles son 3: estos se dan cuando el alumno no fue registrado, si ya se ha graduado o si se intenta reinscribirlo cuando ya se encontraba inscripto.
+
+\begin{schema}{ReinscribirAlumnoNoEncontradoE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \notin registrados
+\end{schema}
+
+\begin{schema}{ReinscribirAlumnoGraduadoE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \in registrados \\
+    ((inscripciones \; alumno?)).1 = maximoGrado \\
+    ((inscripciones \; alumno?)).2 = promueve 
+\end{schema}
+
+\begin{schema}{ReinscribirAlumnoDobleInscripE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \in registrados \\
+    (inscripciones \; alumno?).2 = inscripto
+\end{schema}
+
+\begin{zed}
+    ReinscribirAlumnoE == ReinscribirAlumnoGraduadoE \lor ReinscribirAlumnoDobleInscripE \\
+        \lor ReinscribirAlumnoNoEncontradoE \\
+    ReinscribirAlumnoOk == ReinscribirAlumnoPromovidoOk \lor ReinscribirAlumnoRepitenteOk \\
+    ReinscribirAlumno == ReinscribirAlumnoOk \lor ReinscribirAlumnoE
+\end{zed}
+
+La tercera operación es \emph{CerrarInscripción}, en el caso exitoso se debe dar que el alumno se encuentra registrado y su estado de inscripción sea \emph{inscripto}, luego este estado es reemplazado por \emph{promueve} o \emph{repite} según indique el usuario y el grado se mantiene sin modificaciones. Se permite volver a cerrar una inscripción cerrada para permitir modificaciones o correcciones de errores del usuario.
+
+\begin{schema}{CerrarInscripcionOk}
+    \Delta MisEstudiantes \\
+    alumno?: ALUMNO \\
+    estado?: ESTADO
+    \where
+    alumno? \in registrados \\
+    estado? \neq inscripto \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1, estado?) \} \\
+    registrados' = registrados
+\end{schema}
+
+Los casos de error son dos: se intenta cerrar una inscripción modificando su estado por \emph{inscripto} o el alumno indicado no se encuentra registrado en el sistema.
+
+\begin{schema}{CerrarInscripcionEstadoInvalidoE}
+    \Xi MisEstudiantes \\
+    estado?: ESTADO
+    \where
+    estado? = inscripto
+\end{schema}
+
+\begin{schema}{CerrarInscripcionAlumnoNoEncontradoE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO
+    \where
+    alumno? \notin registrados
+\end{schema}
+
+\begin{zed}
+    CerrarInscripcionE == CerrarInscripcionEstadoInvalidoE \lor CerrarInscripcionAlumnoNoEncontradoE \\
+    CerrarInscripcion == CerrarInscripcionOk \lor CerrarInscripcionE
+\end{zed}
+
+La última operación es \emph{AlumnoEsGraduado} donde hay tres casos posible y cada uno tiene un mensaje de respuesta posible: el alumno está registrado y es graduado, el alumno está registrado y no es graduado o el alumno no está registrado en el sistema.
+\begin{schema}{AlumnoEsGraduadoSiOk}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO \\
+    rep!: REP
+    \where
+    alumno? \in registrados \\
+    (inscripciones \; alumno?).1 = maximoGrado \\
+    (inscripciones \; alumno?).2 = promueve \\
+    rep! = alumnoEsGraduado
+\end{schema}
+
+\begin{schema}{AlumnoEsGraduadoNoOk}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO \\
+    rep!: REP
+    \where
+    alumno? \in registrados \\
+    (inscripciones \; alumno?).1 \neq maximoGrado \lor (inscripciones \; alumno?).2 \neq promueve \\
+    rep! = alumnoNoEsGraduado
+\end{schema}
+
+\begin{schema}{AlumnoEsGraduadoNoEncontradoE}
+    \Xi MisEstudiantes \\
+    alumno? : ALUMNO \\
+    rep!: REP
+    \where
+    alumno? \notin registrados \\
+    rep! = alumnoNoEncontrado
+\end{schema}
+
+\begin{zed}
+    AlumnoEsGraduadoOk == AlumnoEsGraduadoSiOk \lor AlumnoEsGraduadoNoOk \\
+    AlumnoEsGraduado == AlumnoEsGraduadoOk \lor AlumnoEsGraduadoNoEncontradoE \\
+\end{zed}
+
+
 
 \section{\{log\}}
 La traducción de la especificación Z a un programa \emph{\{log\}} se puede encontrar en el archivo \textbf{misestudiantes.pl}, para ejecutar este programa no es necesario consultar ninguna librería.
 
-\subsection*{Simulaciones}
+\subsection{Simulaciones}
 Para realizar las siguientes simulaciones se cargó el programa con el type checker activado y una vez verificado que el programa tipa correctamente se desactivó para simplificar la ejecución de las simulaciones.
 
 \subsubsection*{Primera simulación}
@@ -131,8 +308,7 @@ alumnoEsGraduado(R6, I6, pepe, Rep1, R6, I6) &
 alumnoEsGraduado(R6, I6, pepito, Rep2, R6, I6).
 \end{verbatim}
 
-El objetivo de esta simulación es probar los usos habituales del programa, comenzando
-desde el estado inicial se inscribe un alumno \emph{Pepe} se da una serie de inscripciones cerradas y reinscripciones, incluso una ocasión donde se cerró una inscripción como repitente y luego se modificó a promoción (por ejemplo, el alumno puede haber recuperado materias luego del cierre o se corrigió una equivocación al cerrar por primera vez). Además se consulta si \emph{Pepe} está graduado después de promover segundo grado, lo cual no sería posible, y por último se consulta por un alumno que no se encuentra registrado.
+El objetivo de esta simulación es probar los usos habituales del programa, comenzando desde el estado inicial se inscribe un alumno \emph{Pepe} y se da una serie de inscripciones cerradas y reinscripciones, incluso una ocasión donde se cerró una inscripción como repitente y luego se modificó a promoción (por ejemplo, el alumno puede haber recuperado materias luego del cierre o se corrigió una equivocación al cerrar por primera vez). Además se consulta si \emph{Pepe} está graduado después de promover segundo grado, lo cual no sería posible, y por último se consulta por un alumno que no se encuentra registrado.
 
 \begin{verbatim}
 R0 = {},  
@@ -153,7 +329,7 @@ Rep1 = alumnoNoEsGraduado,
 Rep2 = alumnoNoEncontrado
 \end{verbatim}
 
-Los resultados cumplen lo esperado.
+Obtuvimos el resultado esperado, los cambios de estado fueron satisfactorios y la operación de consulta funcionó correctamente.
 
 \subsubsection*{Segunda simulación}
 \begin{verbatim}
@@ -190,7 +366,7 @@ cerrarInscripcion(R25, I25, pepe, repite, R26, I26) &
 alumnoEsGraduado(R26, I26, pepe, Rep4, R26, I26).
 \end{verbatim}
 
-Esta segunda simulación es más extensa pero consiste en inscribir al alumno \emph{Pepe} partiendo del estado inicial y realizar el ciclo cerrar inscripción/reinscribir hasta que se encuentre cursando el último grado, una vez aquí se consulta si está graduado a lo que se debería obtener una respuesta negativa, se cierra la inscripción para graduarlo, se consulta de nuevo y el resultado esta vez debería ser positivo. Luego, se intenta reinscribir al alumno graduado pero esto no es permitido, por lo que consultando de nuevo se debería ver que mantiene su estado de graduado, el cual solo es perdido cuando se decide modificar el estado del último cierre de inscripción por una repitencia, y consultado por última vez, el resultado sería negativo.
+Esta segunda simulación consiste en inscribir al alumno \emph{Pepe} partiendo del estado inicial y realizar el ciclo cerrar inscripción/reinscribir hasta que se encuentre cursando el último grado, una vez aquí se consulta si está graduado a lo que se debería obtener una respuesta negativa, se cierra la inscripción con una promoción para graduarlo, se consulta de nuevo y el resultado esta vez debería ser positivo. Luego, se intenta reinscribir al alumno graduado pero esto no es permitido, por lo que consultando de nuevo se debería ver que mantiene su estado de graduado. Este estado de graduado es perdido solo cuando se decide modificar el estado del último cierre de inscripción por una repitencia, y consultado por última vez el resultado sería negativo.
 
 \begin{verbatim}
 R0 = {},  
@@ -217,19 +393,20 @@ I26 = {[pepe,[12,repite]]},
 Rep4 = alumnoNoEsGraduado
 \end{verbatim}
 
-Los resultados fueron acortados ya que contaban con muchos estados intermedios similares. Estos resultados cumplen con lo esperados.
+Los resultados fueron acortados ya que contaban con muchos estados intermedios similares. Se obtuvieron los resultados esperados tanto en los cambios de estado satisfactorios, usos inválidos de las operaciones que no modificaron el estado y consultas respondidas correctamente.
 
-\subsection*{Demostración automática de propiedades}
+\subsection{Demostración automática de propiedades}
 Invocando el generador de condiciones de verificación (VCG) con el comando \emph{vcg('misestudiantes.pl').} es generado el archivo \textbf{misestudiantes-vc.pl}, consultando este archivo y ejecutando el comando \emph{check\_vcs\_misestudiantes.} es posible descargar las condiciones de verificación.
 
 En un principio todas las condiciones son verificadas correctamente excepto por la condición \textbf{inscribirAlumno\_pi\_inscripcionesPfunInv}, por lo cual fue necesario agregar la hipótesis \textbf{inscripcionesInv(Registrados, Inscripciones)} y luego esta condición fue descargada exitosamente. No fue necesario utilizar el comando \emph{findh.}
 
 \section{Demostración de preservación de invariantes en Z/Eves}
-Utilizando la interfaz gráfica de \emph{Z/Eves} se definió y demostró el teorema \textbf{InscribirAlumnoPI} el cual verifica que la operación \textbf{InscribirAlumno} preserva el invariante de estado \textbf{InscripcionesInv}.
+Utilizando la interfaz gráfica de \emph{Z/Eves} se definió \textbf{InscribirAlumnoPI} el cual verifica que la operación \textbf{InscribirAlumno} preserva el invariante de estado \textbf{InscripcionesInv}.
 \begin{theorem}{InscribirAlumnoPI}
   InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
 \end{theorem}
 
+Y su demostración es la siguiente:
 \begin{zproof}[InscribirAlumnoPI]
   invoke InscribirAlumno;
   split InscribirAlumnoOk;
@@ -250,157 +427,116 @@ Utilizando la interfaz gráfica de \emph{Z/Eves} se definió y demostró el teor
 Utilizando Fastest se generarán casos de prueba para la operación \emph{ReinscribirAlummno}, los comandos ejecutados para generar los casos de prueba fueron los siguientes:
 
 \begin{verbatim}
-loadspec misestudiantes.tex
-selop ReinscribirAlumno
+loadspec misestudiantes_fastest.tex
+selop CerrarInscripcion
 genalltt
-addtactic ReinscribirAlumno_DNF_1 SP \oplus inscripciones \oplus 
-  \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 + 1 , inscripto ) \}
-addtactic ReinscribirAlumno_DNF_2 SP \oplus inscripciones \oplus 
-  \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , inscripto ) \}
-addtactic ReinscribirAlumno_DNF_3 SP \in alumno? \in registrados
-addtactic ReinscribirAlumno_DNF_4 SP \in alumno? \in registrados
-addtactic ReinscribirAlumno_DNF_5 SP \notin alumno? \notin registrados
+addtactic CerrarInscripcion_DNF_1 FT estado?
+addtactic CerrarInscripcion_DNF_1 SP \oplus inscripciones 
+    \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , estado? ) \}
+addtactic CerrarInscripcion_DNF_2 FT estado?
+addtactic CerrarInscripcion_DNF_3 SP \notin alumno? \notin registrados
 genalltt
 genalltca
 \end{verbatim}
 
 \begin{verbatim}
-ReinscribirAlumno_VIS
-  !______ReinscribirAlumno_DNF_1
-  |	 !______ReinscribirAlumno_SP_15
-  |	 !______ReinscribirAlumno_SP_16
-  |	 !______ReinscribirAlumno_SP_17
-  |	 !______ReinscribirAlumno_SP_18
-  |	 !______ReinscribirAlumno_SP_19
-  |	 !______ReinscribirAlumno_SP_20
-  |	 !______ReinscribirAlumno_SP_21
-  |	 !______ReinscribirAlumno_SP_22
+CerrarInscripcion_VIS
+  !______CerrarInscripcion_DNF_1
+  |	 !______CerrarInscripcion_FT_1
+  |	 |	 !______CerrarInscripcion_SP_4
+  |	 |	 !______CerrarInscripcion_SP_5
+  |	 |	 !______CerrarInscripcion_SP_6
+  |	 |	 !______CerrarInscripcion_SP_7
+  |	 |	 !______CerrarInscripcion_SP_8
+  |	 |	 !______CerrarInscripcion_SP_9
+  |	 |	 !______CerrarInscripcion_SP_10
+  |	 |	 !______CerrarInscripcion_SP_11
+  |	 |
+  |	 !______CerrarInscripcion_FT_2
+  |	 |	 !______CerrarInscripcion_SP_12
+  |	 |	 !______CerrarInscripcion_SP_13
+  |	 |	 !______CerrarInscripcion_SP_14
+  |	 |	 !______CerrarInscripcion_SP_15
+  |	 |	 !______CerrarInscripcion_SP_16
+  |	 |	 !______CerrarInscripcion_SP_17
+  |	 |	 !______CerrarInscripcion_SP_18
+  |	 |	 !______CerrarInscripcion_SP_19
+  |	 |
+  |	 !______CerrarInscripcion_FT_3
+  |	 	 !______CerrarInscripcion_SP_20
+  |	 	 !______CerrarInscripcion_SP_21
+  |	 	 !______CerrarInscripcion_SP_22
+  |	 	 !______CerrarInscripcion_SP_23
+  |	 	 !______CerrarInscripcion_SP_24
+  |	 	 !______CerrarInscripcion_SP_25
+  |	 	 !______CerrarInscripcion_SP_26
+  |	 	 !______CerrarInscripcion_SP_27
+  |	
   |
-  !______ReinscribirAlumno_DNF_2
-  |	 !______ReinscribirAlumno_SP_7
-  |	 !______ReinscribirAlumno_SP_8
-  |	 !______ReinscribirAlumno_SP_9
-  |	 !______ReinscribirAlumno_SP_10
-  |	 !______ReinscribirAlumno_SP_11
-  |	 !______ReinscribirAlumno_SP_12
-  |	 !______ReinscribirAlumno_SP_13
-  |	 !______ReinscribirAlumno_SP_14
+  !______CerrarInscripcion_DNF_2
+  |	 !______CerrarInscripcion_FT_28
+  |	 !______CerrarInscripcion_FT_29
+  |	 !______CerrarInscripcion_FT_30
   |
-  !______ReinscribirAlumno_DNF_3
-  |	 !______ReinscribirAlumno_SP_5
-  |	 !______ReinscribirAlumno_SP_6
-  |
-  !______ReinscribirAlumno_DNF_4
-  |	 !______ReinscribirAlumno_SP_3
-  |	 !______ReinscribirAlumno_SP_4
-  |
-  !______ReinscribirAlumno_DNF_5
-  	 !______ReinscribirAlumno_SP_1
-  	 !______ReinscribirAlumno_SP_2
+  !______CerrarInscripcion_DNF_3
+  	 !______CerrarInscripcion_SP_31
+  	 !______CerrarInscripcion_SP_32
 \end{verbatim}
 
 asdasdadasdsad
 
 \begin{verbatim}
-ReinscribirAlumno_VIS
-  !______ReinscribirAlumno_DNF_1
-  |	 !______ReinscribirAlumno_SP_18
-  |	 |	 !______ReinscribirAlumno_SP_18_TCASE
-  |	 |
-  |	 !______ReinscribirAlumno_SP_19
-  |	 	 !______ReinscribirAlumno_SP_19_TCASE
-  |	
-  |
-  !______ReinscribirAlumno_DNF_2
-  |	 !______ReinscribirAlumno_SP_10
-  |	 |	 !______ReinscribirAlumno_SP_10_TCASE
-  |	 |
-  |	 !______ReinscribirAlumno_SP_11
-  |	 	 !______ReinscribirAlumno_SP_11_TCASE
-  |	
-  |
-  !______ReinscribirAlumno_DNF_3
-  |	 !______ReinscribirAlumno_SP_5
-  |	 |	 !______ReinscribirAlumno_SP_5_TCASE
-  |	 |
-  |	 !______ReinscribirAlumno_SP_6
-  |	 	 !______ReinscribirAlumno_SP_6_TCASE
-  |	
-  |
-  !______ReinscribirAlumno_DNF_4
-  |	 !______ReinscribirAlumno_SP_3
-  |	 |	 !______ReinscribirAlumno_SP_3_TCASE
-  |	 |
-  |	 !______ReinscribirAlumno_SP_4
-  |	 	 !______ReinscribirAlumno_SP_4_TCASE
-  |	
-  |
-  !______ReinscribirAlumno_DNF_5
-  	 !______ReinscribirAlumno_SP_1
-  	 |	 !______ReinscribirAlumno_SP_1_TCASE
-  	 |
-  	 !______ReinscribirAlumno_SP_2
-  	 	 !______ReinscribirAlumno_SP_2_TCASE
 \end{verbatim}
 
 Acá explicar por qué no generó para algunas hojas del árbol de prueba
 
 \subsubsection*{Esquemas de casos de pruebas generados}
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 18\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 18
+\begin{schema}{CerrarInscripcion\_ SP\_ 15\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 15
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 19\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 19
+\begin{schema}{CerrarInscripcion\_ SP\_ 16\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 16
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 10\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 10
+\begin{schema}{CerrarInscripcion\_ SP\_ 23\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 23
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 11\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 11
+\begin{schema}{CerrarInscripcion\_ SP\_ 24\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 24
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 5\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 5
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 6\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 6
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 3\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 3
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 4\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 4
-\end{schema}
-
-
-\begin{schema}{ReinscribirAlumno\_ SP\_ 1\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 1 
+\begin{schema}{CerrarInscripcion\_ FT\_ 28\_ TCASE}\\
+ CerrarInscripcion\_ FT\_ 28 
 \where
  registrados =~\emptyset \\
  inscripciones =~\emptyset \\
+ estado? = inscripto \\
  alumno? = aLUMNO1
 \end{schema}
 
 
-\begin{schema}{ReinscribirAlumno\_ SP\_ 2\_ TCASE}\\
- ReinscribirAlumno\_ SP\_ 2 
+\begin{schema}{CerrarInscripcion\_ SP\_ 31\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 31 
+\where
+ registrados =~\emptyset \\
+ inscripciones =~\emptyset \\
+ estado? = inscripto \\
+ alumno? = aLUMNO1
+\end{schema}
+
+
+\begin{schema}{CerrarInscripcion\_ SP\_ 32\_ TCASE}\\
+ CerrarInscripcion\_ SP\_ 32 
 \where
  registrados = \{ aLUMNO1 \} \\
  inscripciones =~\emptyset \\
+ estado? = inscripto \\
  alumno? = aLUMNO1
 \end{schema}
 

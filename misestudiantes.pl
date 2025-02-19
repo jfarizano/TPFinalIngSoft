@@ -5,10 +5,10 @@ def_type(inscripcion, [grado, estado]).
 def_type(inscripciones, rel(alumno, inscripcion)).
 def_type(alumnos, set(alumno)).
 
-%%% ==========================================================================
-%%% Funciones copiadas de las librerías para agregar las declaraciones de 
-%%% tipos necesarias para usar el type checker
-%%% ==========================================================================
+%%% -----------------------------------
+%%% Los siguientes operadores fueron copiados de la librería de funciones parciales para
+%%% agregar las declaraciones de tipos necesarias para usar el type checker
+%%% -----------------------------------
 
 dec_pp_type(inDom(X, rel(X,Y))).
 inDom(Item, Rel) :- 
@@ -18,11 +18,26 @@ dec_pp_type(ninDom(X, rel(X,Y))).
 ninDom(Item, Rel) :- 
     dom(Rel, Z) & dec(Z, set(X)) & Item nin Z.
 
-%%% ==========================================================================
-%%% ==========================================================================
+%%% -----------------------------------
+%%% Parámetro utilizado para definición axiomática
+%%% -----------------------------------
+parameters([MaximoGrado]).
 
+%%% -----------------------------------
+%%% Variables de estado
+%%% -----------------------------------
 variables([Registrados, Inscripciones]).
 
+%%% -----------------------------------
+%%% Definición axiomática
+%%% -----------------------------------
+axiom(maximoGrado).
+dec_p_type(maximoGrado(grado)).
+maximoGrado(MaximoGrado) :- MaximoGrado = 12.
+
+%%% -----------------------------------
+%% Invariantes
+%%% -----------------------------------
 invariant(inscripcionesInv).
 dec_p_type(inscripcionesInv(alumnos, inscripciones)).
 inscripcionesInv(Registrados, Inscripciones) :-
@@ -47,7 +62,9 @@ maximoGradoInv(Registrados, Inscripciones) :-
             [G, E] = I &
             dec(G, grado) &
             dec(E, estado) &
-            G =< 12).
+            maximoGrado(MaximoGrado) &
+            dec(MaximoGrado, grado) &
+            G =< MaximoGrado).
 
 dec_p_type(n_maximoGradoInv(alumnos, inscripciones)).
 n_maximoGradoInv(Registrados, Inscripciones) :-
@@ -57,7 +74,9 @@ n_maximoGradoInv(Registrados, Inscripciones) :-
              [G, E] = I &
              dec(G, grado) &
              dec(E, estado) &
-             G > 12).
+             maximoGrado(MaximoGrado) &
+             dec(MaximoGrado, grado) &
+             G > MaximoGrado).
 
 invariant(inscripcionesPfunInv).
 dec_p_type(inscripcionesPfunInv(inscripciones)).
@@ -68,12 +87,18 @@ dec_p_type(n_inscripcionesPfunInv(inscripciones)).
 n_inscripcionesPfunInv(Inscripciones) :-
     npfun(Inscripciones).
 
+%%% -----------------------------------
+%%% Estado inicial
+%%% -----------------------------------
 dec_p_type(misEstudiantesInicial(alumnos, inscripciones)).
 initial(misEstudiantesInicial).
 misEstudiantesInicial(Registrados, Inscripciones) :-
     Registrados = {} &
     Inscripciones = {}.
 
+%%% -----------------------------------
+%%% Operaciones
+%%% -----------------------------------
 dec_p_type(inscribirAlumnoOk(alumnos, inscripciones, alumno, alumnos, inscripciones)).
 inscribirAlumnoOk(Registrados, Inscripciones, Alumno, Registrados_, Inscripciones_) :-
     Alumno nin Registrados &
@@ -100,7 +125,9 @@ reinscribirAlumnoPromovidoOk(Registrados, Inscripciones, Alumno, Registrados_, I
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    G < 12 &
+    maximoGrado(MaximoGrado) &
+    dec(MaximoGrado, grado) &
+    G < MaximoGrado &
     E = promueve &
     G_ is G + 1 &
     dec(G_, grado) &
@@ -117,7 +144,9 @@ reinscribirAlumnoRepitenteOk(Registrados, Inscripciones, Alumno, Registrados_, I
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    G =< 12 &
+    maximoGrado(MaximoGrado) &
+    dec(MaximoGrado, grado) &
+    G =< MaximoGrado &
     E = repite &
     I_ = [G, inscripto] &
     dec(I_, inscripcion) &
@@ -138,7 +167,9 @@ reinscribirAlumnoGraduadoE(Registrados, Inscripciones, Alumno, Registrados_, Ins
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    G = 12 &
+    maximoGrado(MaximoGrado) &
+    dec(MaximoGrado, grado) &
+    G = MaximoGrado &
     E = promueve &
     Inscripciones_ = Inscripciones &
     Registrados_ = Registrados.
@@ -205,7 +236,9 @@ alumnoEsGraduadoSiOk(Registrados, Inscripciones, Alumno, Rep, Registrados, Inscr
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    G = 12 &
+    maximoGrado(MaximoGrado) &
+    dec(MaximoGrado, grado) &
+    G = MaximoGrado &
     E = promueve &
     Rep = alumnoEsGraduado.
 
@@ -217,7 +250,9 @@ alumnoEsGraduadoNoOk(Registrados, Inscripciones, Alumno, Rep, Registrados, Inscr
     [G, E] = I &
     dec(G, grado) &
     dec(E, estado) &
-    (G neq 12 or E neq promueve) &
+    maximoGrado(MaximoGrado) &
+    dec(MaximoGrado, grado) &
+    (G neq MaximoGrado or E neq promueve) &
     Rep = alumnoNoEsGraduado.
 
 dec_p_type(alumnoEsGraduadoNoEncontradoE(alumnos, inscripciones, alumno, rep, alumnos, inscripciones)).

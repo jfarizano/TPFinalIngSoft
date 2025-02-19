@@ -11,6 +11,12 @@
     REP ::= alumnoEsGraduado | alumnoNoEsGraduado | alumnoNoEncontrado
 \end{zed}
 
+\begin{axdef}
+    maximoGrado : GRADO
+\where
+    maximoGrado = 12
+\end{axdef}
+
 \begin{schema}{MisEstudiantes}
     registrados: \power ALUMNO \\
     inscripciones: ALUMNO \pfun (GRADO \cross ESTADO)
@@ -25,7 +31,7 @@
 \begin{schema}{MaximoGradoInv}
     MisEstudiantes
     \where
-    \forall alumno : registrados @ (inscripciones alumno).1 \leq 12
+    \forall alumno : registrados @ (inscripciones alumno).1 \leq maximoGrado
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
@@ -60,7 +66,7 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 < 12 \\ 
+    (inscripciones alumno?).1 < maximoGrado \\ 
     (inscripciones alumno?).2 = promueve \\
     inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1 + 1, inscripto) \} \\
     registrados' = registrados
@@ -71,7 +77,7 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 \leq 12 \\ 
+    (inscripciones alumno?).1 \leq maximoGrado \\ 
     (inscripciones alumno?).2 = repite \\
     inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, inscripto) \} \\
     registrados' = registrados
@@ -89,7 +95,7 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    ((inscripciones alumno?)).1 = 12 \\
+    ((inscripciones alumno?)).1 = maximoGrado \\
     ((inscripciones alumno?)).2 = promueve 
 \end{schema}
 
@@ -149,7 +155,7 @@
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 = 12 \\
+    (inscripciones alumno?).1 = maximoGrado \\
     (inscripciones alumno?).2 = promueve \\
     rep! = alumnoEsGraduado
 \end{schema}
@@ -160,7 +166,7 @@
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 \neq 12 \lor (inscripciones alumno?).2 \neq promueve \\
+    (inscripciones alumno?).1 \neq maximoGrado \lor (inscripciones alumno?).2 \neq promueve \\
     rep! = alumnoNoEsGraduado
 \end{schema}
 
