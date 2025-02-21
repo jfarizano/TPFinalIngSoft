@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage[a4paper,hmargin=1in, vmargin=1.4in,footskip=0.25in]{geometry}
+\usepackage{alltt,xcolor}
 
 \usepackage{czt}
 
@@ -128,7 +129,7 @@ La segunda invariante representa que para todo alumno registrado su grado de ins
 \begin{schema}{MaximoGradoInv}
     MisEstudiantes
     \where
-    \forall alumno : registrados @ (inscripciones \; alumno).1 \leq maximoGrado
+    \forall alumno : registrados @ (inscripciones~alumno).1 \leq maximoGrado
 \end{schema}
 
 Definimos el estado inicial del sistema:
@@ -167,9 +168,9 @@ La siguiente operación a modelar es \emph{ReinscribirAlumno}, esta cuenta con d
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones \; alumno?).1 < maximoGrado \\ 
-    (inscripciones \; alumno?).2 = promueve \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1 + 1, inscripto) \} \\
+    (inscripciones~alumno?).1 < maximoGrado \\ 
+    (inscripciones~alumno?).2 = promueve \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1 + 1, inscripto) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -178,9 +179,9 @@ La siguiente operación a modelar es \emph{ReinscribirAlumno}, esta cuenta con d
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones \; alumno?).1 \leq maximoGrado \\ 
-    (inscripciones \; alumno?).2 = repite \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1, inscripto) \} \\
+    (inscripciones~alumno?).1 \leq maximoGrado \\ 
+    (inscripciones~alumno?).2 = repite \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1, inscripto) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -198,8 +199,8 @@ Los casos de error posibles son 3: estos se dan cuando el alumno no fue registra
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    ((inscripciones \; alumno?)).1 = maximoGrado \\
-    ((inscripciones \; alumno?)).2 = promueve 
+    ((inscripciones~alumno?)).1 = maximoGrado \\
+    ((inscripciones~alumno?)).2 = promueve 
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoDobleInscripE}
@@ -207,7 +208,7 @@ Los casos de error posibles son 3: estos se dan cuando el alumno no fue registra
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones \; alumno?).2 = inscripto
+    (inscripciones~alumno?).2 = inscripto
 \end{schema}
 
 \begin{zed}
@@ -226,7 +227,7 @@ La tercera operación es \emph{CerrarInscripción}, en el caso exitoso se debe d
     \where
     alumno? \in registrados \\
     estado? \neq inscripto \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones \; alumno?).1, estado?) \} \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1, estado?) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -258,8 +259,8 @@ La última operación es \emph{AlumnoEsGraduado} donde hay tres casos posible y 
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones \; alumno?).1 = maximoGrado \\
-    (inscripciones \; alumno?).2 = promueve \\
+    (inscripciones~alumno?).1 = maximoGrado \\
+    (inscripciones~alumno?).2 = promueve \\
     rep! = alumnoEsGraduado
 \end{schema}
 
@@ -269,7 +270,7 @@ La última operación es \emph{AlumnoEsGraduado} donde hay tres casos posible y 
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones \; alumno?).1 \neq maximoGrado \lor (inscripciones \; alumno?).2 \neq promueve \\
+    (inscripciones~alumno?).1 \neq maximoGrado \lor (inscripciones~alumno?).2 \neq promueve \\
     rep! = alumnoNoEsGraduado
 \end{schema}
 
@@ -401,12 +402,12 @@ Invocando el generador de condiciones de verificación (VCG) con el comando \emp
 En un principio todas las condiciones son verificadas correctamente excepto por la condición \textbf{inscribirAlumno\_pi\_inscripcionesPfunInv}, por lo cual fue necesario agregar la hipótesis \textbf{inscripcionesInv(Registrados, Inscripciones)} y luego esta condición fue descargada exitosamente. No fue necesario utilizar el comando \emph{findh.}
 
 \section{Demostración de preservación de invariantes en Z/Eves}
-Utilizando la interfaz gráfica de \emph{Z/Eves} se definió \textbf{InscribirAlumnoPI} el cual verifica que la operación \textbf{InscribirAlumno} preserva el invariante de estado \textbf{InscripcionesInv}.
+En el archivo \textbf{misestudiantes\_zeves.tex} se puede encontrar la especificación vista anteriormente con la adición de la definición del teorema \textbf{InscribirAlumnoPI}, el cual verifica que la operación \textbf{InscribirAlumno} preserva el invariante de estado \textbf{InscripcionesInv}.
 \begin{theorem}{InscribirAlumnoPI}
   InscripcionesInv \land InscribirAlumno \implies InscripcionesInv'
 \end{theorem}
 
-Y su demostración es la siguiente:
+Utilizando la interfaz gráfica \emph{Z/Eves} se importó el archivo con la especificación y se realizó la siguiente demostración del teorema:
 \begin{zproof}[InscribirAlumnoPI]
   invoke InscribirAlumno;
   split InscribirAlumnoOk;
@@ -423,94 +424,144 @@ Y su demostración es la siguiente:
   next;
 \end{zproof}
 
+Agregando la prueba al archivo fue posible confirmar la misma utilizando la interfaz de consola.
+
 \section{Generación de casos de prueba con Fastest}
-Utilizando Fastest se generarán casos de prueba para la operación \emph{ReinscribirAlummno}, los comandos ejecutados para generar los casos de prueba fueron los siguientes:
+En el archivo \textbf{misestudiantes\_fastest.tex} se puede encontrar la especificación con su sintaxis adaptada a la aceptada por Fastest, esta es idéntica a la vista anteriormente en este informe pero debido a que la herramienta no soporta sinónimos de tipos las ocurrencias de GRADO fueron reemplazadas por $\nat$.
+Utilizando esta herramienta se generarán casos de prueba para la operación \emph{ReinscribirAlumno}, los comandos ejecutados para generar los casos de prueba fueron los siguientes:
 
 \begin{verbatim}
 loadspec misestudiantes_fastest.tex
 selop CerrarInscripcion
 genalltt
 addtactic CerrarInscripcion_DNF_1 FT estado?
+addtactic CerrarInscripcion_DNF_2 FT estado?
 addtactic CerrarInscripcion_DNF_1 SP \oplus inscripciones 
     \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , estado? ) \}
-addtactic CerrarInscripcion_DNF_2 FT estado?
 addtactic CerrarInscripcion_DNF_3 SP \notin alumno? \notin registrados
 genalltt
 genalltca
 \end{verbatim}
 
-\begin{verbatim}
+De esta forma se carga la especificación, se selecciona la operación \emph{CerrarInscripción} y luego son aplicadas las tácticas de testing.
+Lo primero que se hace es aplicar la táctica \emph{Disjuntive Normal Form (DNF)} (utilizada automáticamente al ejecutar el comando \emph{genalltt}) la cual separa la operación en los tres esquemas que la componen:
+\begin{enumerate}
+ \item \emph{CerrarInscripcion\_DNF\_1} corresponde al esquema \emph{CerrarInscripcionOk}
+ \item \emph{CerrarInscripcion\_DNF\_2} corresponde al esquema \emph{CerrarInscripcionEstadoInvalidoE}
+ \item \emph{CerrarInscripcion\_DNF\_3} corresponde al esquema \emph{CerrarInscripcionAlumnoNoEncontradoE}
+\end{enumerate}
+Luego para los primeros dos esquemas, los cuales reciben una variable de tipo \emph{ESTADO} como entrada se les aplica la táctica de \emph{Free Type (FT)} para generar un caso para cada valor posible de este tipo (siendo estos \emph{inscripto}, \emph{promueve} o \emph{repite}). Por último, se aplican las tácticas de \emph{Standard Partition (SP)} sobre los operadores $\oplus$ y $\notin$. Obtenemos el siguiente árbol:
+
+\begin{alltt}
 CerrarInscripcion_VIS
   !______CerrarInscripcion_DNF_1
-  |	 !______CerrarInscripcion_FT_1
-  |	 |	 !______CerrarInscripcion_SP_4
-  |	 |	 !______CerrarInscripcion_SP_5
-  |	 |	 !______CerrarInscripcion_SP_6
-  |	 |	 !______CerrarInscripcion_SP_7
-  |	 |	 !______CerrarInscripcion_SP_8
-  |	 |	 !______CerrarInscripcion_SP_9
-  |	 |	 !______CerrarInscripcion_SP_10
-  |	 |	 !______CerrarInscripcion_SP_11
-  |	 |
-  |	 !______CerrarInscripcion_FT_2
-  |	 |	 !______CerrarInscripcion_SP_12
-  |	 |	 !______CerrarInscripcion_SP_13
-  |	 |	 !______CerrarInscripcion_SP_14
-  |	 |	 !______CerrarInscripcion_SP_15
-  |	 |	 !______CerrarInscripcion_SP_16
-  |	 |	 !______CerrarInscripcion_SP_17
-  |	 |	 !______CerrarInscripcion_SP_18
-  |	 |	 !______CerrarInscripcion_SP_19
-  |	 |
-  |	 !______CerrarInscripcion_FT_3
-  |	 	 !______CerrarInscripcion_SP_20
-  |	 	 !______CerrarInscripcion_SP_21
-  |	 	 !______CerrarInscripcion_SP_22
-  |	 	 !______CerrarInscripcion_SP_23
-  |	 	 !______CerrarInscripcion_SP_24
-  |	 	 !______CerrarInscripcion_SP_25
-  |	 	 !______CerrarInscripcion_SP_26
-  |	 	 !______CerrarInscripcion_SP_27
-  |	
+  |      !______CerrarInscripcion_FT_1
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_4}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_5}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_6}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_7}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_8}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_9}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_10}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_11}
+  |      |
+  |      !______CerrarInscripcion_FT_2
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_12}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_13}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_14}
+  |      |      !______\textcolor{green}{CerrarInscripcion_SP_15}
+  |      |      |      !______CerrarInscripcion_SP_15_TCASE
+  |      |      |
+  |      |      !______\textcolor{green}{CerrarInscripcion_SP_16}
+  |      |      |      !______CerrarInscripcion_SP_16_TCASE
+  |      |      |
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_17}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_18}
+  |      |      !______\textcolor{red}{CerrarInscripcion_SP_19}
+  |      |
+  |      !______CerrarInscripcion_FT_3
+  |            !______\textcolor{red}{CerrarInscripcion_SP_20}
+  |            !______\textcolor{red}{CerrarInscripcion_SP_21}
+  |            !______\textcolor{red}{CerrarInscripcion_SP_22}
+  |            !______\textcolor{green}{CerrarInscripcion_SP_23}
+  |            |      !______CerrarInscripcion_SP_23_TCASE
+  |            |
+  |            !______\textcolor{green}{CerrarInscripcion_SP_24}
+  |            |      !______CerrarInscripcion_SP_24_TCASE
+  |            |
+  |            !______\textcolor{red}{CerrarInscripcion_SP_25}
+  |            !______\textcolor{red}{CerrarInscripcion_SP_26}
+  |            !______\textcolor{red}{CerrarInscripcion_SP_27}
+  |
   |
   !______CerrarInscripcion_DNF_2
-  |	 !______CerrarInscripcion_FT_28
-  |	 !______CerrarInscripcion_FT_29
-  |	 !______CerrarInscripcion_FT_30
+  |      !______\textcolor{green}{CerrarInscripcion_FT_28}
+  |      |      !______CerrarInscripcion_FT_28_TCASE
+  |      |
+  |      !______\textcolor{red}{CerrarInscripcion_FT_29}
+  |      !______\textcolor{red}{CerrarInscripcion_FT_30}
   |
   !______CerrarInscripcion_DNF_3
-  	 !______CerrarInscripcion_SP_31
-  	 !______CerrarInscripcion_SP_32
-\end{verbatim}
+         !______\textcolor{green}{CerrarInscripcion_SP_31}
+         |      !______CerrarInscripcion_SP_31_TCASE
+         |
+         !______\textcolor{green}{CerrarInscripcion_SP_32}
+                !______CerrarInscripcion_SP_32_TCASE
+\end{alltt}
 
-asdasdadasdsad
-
-\begin{verbatim}
-\end{verbatim}
+Los casos resaltados en rojo son aquellos que fueron podados, y en verde aquellos de los cuales resultó un caso de prueba generado.
 
 Acá explicar por qué no generó para algunas hojas del árbol de prueba
+\begin{itemize}
+    \item La rama del caso \emph{CerrarInscripcion\_FT\_1} fue podada ya que fue generada por la táctica \emph{FT} dando el valor de inscripto a la variable \estado{estado?}, incumpliendo
+          la precondición $estado? \neq inscripto$
+\end{itemize}
 
 \subsubsection*{Esquemas de casos de pruebas generados}
+
+Por último, los casos de prueba generados fueron los siguientes:
+
+Este primer caso modifica el cierre de una inscripción desde una repitencia a una promoción para un alumno \emph{aLUMNO1}. Este caso es correcto.
 \begin{schema}{CerrarInscripcion\_ SP\_ 15\_ TCASE}\\
- CerrarInscripcion\_ SP\_ 15
+ CerrarInscripcion\_ SP\_ 15 
+\where
+ registrados = \{ aLUMNO1 \} \\
+ inscripciones = \{ ( aLUMNO1 \mapsto ( 1 \mapsto repite ) ) \} \\
+ estado? = promueve \\
+ alumno? = aLUMNO1
 \end{schema}
 
-
+Este caso realiza lo mismo que el anterior pero con la diferencia de que en la función de \emph{inscripciones} se encuentra en el dominio el alumno \emph{aLUMNO3} el cual no se encuentra dentro del conjunto {registrados}, incumpliendo con la invariante \emph{InscripcionesInv}.
 \begin{schema}{CerrarInscripcion\_ SP\_ 16\_ TCASE}\\
- CerrarInscripcion\_ SP\_ 16
+ CerrarInscripcion\_ SP\_ 16 
+\where
+ registrados = \{ aLUMNO1 \} \\
+ inscripciones = \{ ( aLUMNO1 \mapsto ( 1 \mapsto repite ) ) , ( aLUMNO3 \mapsto ( 2 \mapsto promueve ) ) \} \\
+ estado? = promueve \\
+ alumno? = aLUMNO1
 \end{schema}
 
-
+Este caso modifica el cierre de una inscripción por el mismo estado que ya tenía, sigue siendo un caso válido y cumple con las invariantes.
 \begin{schema}{CerrarInscripcion\_ SP\_ 23\_ TCASE}\\
- CerrarInscripcion\_ SP\_ 23
+ CerrarInscripcion\_ SP\_ 23 
+\where
+ registrados = \{ aLUMNO1 \} \\
+ inscripciones = \{ ( aLUMNO1 \mapsto ( 1 \mapsto repite ) ) \} \\
+ estado? = repite \\
+ alumno? = aLUMNO1
 \end{schema}
 
-
+Este caso es inválido ya que incumple la invariante \emph{InscripcionesInv}.
 \begin{schema}{CerrarInscripcion\_ SP\_ 24\_ TCASE}\\
- CerrarInscripcion\_ SP\_ 24
+ CerrarInscripcion\_ SP\_ 24 
+\where
+ registrados = \{ aLUMNO1 \} \\
+ inscripciones = \{ ( aLUMNO1 \mapsto ( 1 \mapsto repite ) ) , ( aLUMNO3 \mapsto ( 2 \mapsto promueve ) ) \} \\
+ estado? = repite \\
+ alumno? = aLUMNO1
 \end{schema}
 
-
+El siguiente caso es válido ya que entra en el caso de error \emph{CerrarInscripcionEstadoInvalidoE} pero también podría entrar en el caso de error \emph{CerrarInscripcionAlumnoNoEncontradoE}, por lo cual también vuelve a ser generado en el caso siguiente.
 \begin{schema}{CerrarInscripcion\_ FT\_ 28\_ TCASE}\\
  CerrarInscripcion\_ FT\_ 28 
 \where
@@ -530,7 +581,7 @@ Acá explicar por qué no generó para algunas hojas del árbol de prueba
  alumno? = aLUMNO1
 \end{schema}
 
-
+Este caso es incorrecto porque es generado como caso de prueba del esquema \emph{CerrarInscripcionAlumnoNoEncontradoE} pero incumple con la precondición $alumno? \notin registrados$.
 \begin{schema}{CerrarInscripcion\_ SP\_ 32\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 32 
 \where

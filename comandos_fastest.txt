@@ -2,8 +2,8 @@ loadspec misestudiantes_fastest.tex
 selop CerrarInscripcion
 genalltt
 addtactic CerrarInscripcion_DNF_1 FT estado?
-addtactic CerrarInscripcion_DNF_1 SP \oplus inscripciones \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , estado? ) \}
 addtactic CerrarInscripcion_DNF_2 FT estado?
+addtactic CerrarInscripcion_DNF_1 SP \oplus inscripciones \oplus \{ alumno? \mapsto ( ( inscripciones(alumno?) ).1 , estado? ) \}
 addtactic CerrarInscripcion_DNF_3 SP \notin alumno? \notin registrados
 genalltt
 showtt

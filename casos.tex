@@ -1,0 +1,320 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage{indentfirst}
+\usepackage{mathtools}
+\usepackage{xparse} 
+\usepackage{fancyhdr}
+\usepackage[spanish, mexico]{babel}
+\usepackage[spanish]{layout}
+\usepackage[utf8]{inputenc}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[a4paper,hmargin=1in, vmargin=1.4in,footskip=0.25in]{geometry}
+\usepackage{czt}
+
+\begin{document}
+
+
+\begin{schema}{CerrarInscripcion\_ VIS}\\
+  registrados : \power ALUMNO \\
+  inscripciones : ALUMNO \pfun ( \nat \cross ESTADO ) \\
+  alumno? : ALUMNO \\
+  estado? : ESTADO 
+ \where
+  ( alumno? \in registrados \\
+  estado? \neq inscripto ) \lor estado? = inscripto \lor alumno? \notin registrados
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ DNF\_ 1}\\
+  CerrarInscripcion\_ VIS 
+ \where
+  alumno? \in registrados \\
+  estado? \neq inscripto
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 1}\\
+  CerrarInscripcion\_ DNF\_ 1 
+ \where
+  estado? = inscripto
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 4}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 5}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 6}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 7}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 8}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subset \dom inscripciones
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 9}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 10}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones \subset \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 11}\\
+  CerrarInscripcion\_ FT\_ 1 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) \neq \{ \} \\
+  \lnot \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subseteq \dom inscripciones \\
+  \lnot \dom inscripciones \subseteq \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 2}\\
+  CerrarInscripcion\_ DNF\_ 1 
+ \where
+  estado? = promueve
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 12}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 13}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 14}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 15}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 16}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subset \dom inscripciones
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 17}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 18}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones \subset \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 19}\\
+  CerrarInscripcion\_ FT\_ 2 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) \neq \{ \} \\
+  \lnot \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subseteq \dom inscripciones \\
+  \lnot \dom inscripciones \subseteq \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 3}\\
+  CerrarInscripcion\_ DNF\_ 1 
+ \where
+  estado? = repite
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 20}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 21}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones = \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 22}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 23}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones = \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 24}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subset \dom inscripciones
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 25}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 26}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  \dom inscripciones \subset \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 27}\\
+  CerrarInscripcion\_ FT\_ 3 
+ \where
+  inscripciones \neq \{ \} \\
+  \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \neq \{ \} \\
+  ( \dom inscripciones \cap \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} ) \neq \{ \} \\
+  \lnot \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \} \subseteq \dom inscripciones \\
+  \lnot \dom inscripciones \subseteq \dom \{ alumno? \mapsto ( ( inscripciones~alumno? ) . 1 , estado? ) \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ DNF\_ 2}\\
+  CerrarInscripcion\_ VIS 
+ \where
+  estado? = inscripto
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 28}\\
+  CerrarInscripcion\_ DNF\_ 2 
+ \where
+  estado? = inscripto
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 29}\\
+  CerrarInscripcion\_ DNF\_ 2 
+ \where
+  estado? = promueve
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ FT\_ 30}\\
+  CerrarInscripcion\_ DNF\_ 2 
+ \where
+  estado? = repite
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ DNF\_ 3}\\
+  CerrarInscripcion\_ VIS 
+ \where
+  alumno? \notin registrados
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 31}\\
+  CerrarInscripcion\_ DNF\_ 3 
+ \where
+  registrados = \{ \}
+ \end{schema}
+ 
+ 
+ \begin{schema}{CerrarInscripcion\_ SP\_ 32}\\
+  CerrarInscripcion\_ DNF\_ 3 
+ \where
+  registrados \neq \{ \}
+ \end{schema}
+
+\end{document}

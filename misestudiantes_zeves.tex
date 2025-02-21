@@ -31,7 +31,7 @@
 \begin{schema}{MaximoGradoInv}
     MisEstudiantes
     \where
-    \forall alumno : registrados @ (inscripciones alumno).1 \leq maximoGrado
+    \forall alumno : registrados @ (inscripciones~alumno).1 \leq maximoGrado
 \end{schema}
 
 \begin{schema}{MisEstudiantesInicial}
@@ -66,9 +66,9 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 < maximoGrado \\ 
-    (inscripciones alumno?).2 = promueve \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1 + 1, inscripto) \} \\
+    (inscripciones~alumno?).1 < maximoGrado \\ 
+    (inscripciones~alumno?).2 = promueve \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1 + 1, inscripto) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -77,9 +77,9 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 \leq maximoGrado \\ 
-    (inscripciones alumno?).2 = repite \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, inscripto) \} \\
+    (inscripciones~alumno?).1 \leq maximoGrado \\ 
+    (inscripciones~alumno?).2 = repite \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1, inscripto) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -95,8 +95,8 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    ((inscripciones alumno?)).1 = maximoGrado \\
-    ((inscripciones alumno?)).2 = promueve 
+    ((inscripciones~alumno?)).1 = maximoGrado \\
+    ((inscripciones~alumno?)).2 = promueve 
 \end{schema}
 
 \begin{schema}{ReinscribirAlumnoDobleInscripE}
@@ -104,7 +104,7 @@
     alumno? : ALUMNO
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).2 = inscripto
+    (inscripciones~alumno?).2 = inscripto
 \end{schema}
 
 \begin{zed}
@@ -124,7 +124,7 @@
     \where
     alumno? \in registrados \\
     estado? \neq inscripto \\
-    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones alumno?).1, estado?) \} \\
+    inscripciones' = inscripciones \oplus \{alumno? \mapsto ((inscripciones~alumno?).1, estado?) \} \\
     registrados' = registrados
 \end{schema}
 
@@ -155,8 +155,8 @@
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 = maximoGrado \\
-    (inscripciones alumno?).2 = promueve \\
+    (inscripciones~alumno?).1 = maximoGrado \\
+    (inscripciones~alumno?).2 = promueve \\
     rep! = alumnoEsGraduado
 \end{schema}
 
@@ -166,7 +166,7 @@
     rep!: REP
     \where
     alumno? \in registrados \\
-    (inscripciones alumno?).1 \neq maximoGrado \lor (inscripciones alumno?).2 \neq promueve \\
+    (inscripciones~alumno?).1 \neq maximoGrado \lor (inscripciones~alumno?).2 \neq promueve \\
     rep! = alumnoNoEsGraduado
 \end{schema}
 
