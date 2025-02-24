@@ -62,7 +62,7 @@
 \end{titlepage}
 
 \section{Enunciado del problema}
-Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
+Queremos especificar el funcionamiento del sistema \emph{Mis Estudiantes} que utilizan equipos directivos de escuelas primarias y secundarias para inscribir y reinscribir alumnos (por ej. promoción de grado, repitente, etc) en la base de datos del Ministerio de Educación de la provincia de Buenos Aires, lo descrito es similar al sistema existente pero simplificado para mantener una dificultad razonable para este trabajo práctico.
 
 Un directivo desea inscribir o reinscribir a un alumno en su escuela. A cada alumno se le asigna una inscripción actual que consiste en un grado escolar y un estado que representa una de las tres siguientes situaciones:
 
@@ -140,7 +140,7 @@ Definimos el estado inicial del sistema:
     inscripciones = \emptyset
 \end{schema}
 
-La primera operación a especificar es \emph{InscribirAlumno}. En el caso exitoso se debe dar la condición de que el alumno especificado no se encuentre registrado en el sistema, luego se lo registra y se los inscribe a primer grado.
+La primera operación a especificar es \emph{InscribirAlumno}. En el caso exitoso se debe dar la condición de que el alumno especificado no se encuentre registrado en el sistema, luego se lo registra y se lo inscribe a primer grado.
 \begin{schema}{InscribirAlumnoOk}
     \Delta MisEstudiantes \\
     alumno? : ALUMNO
@@ -509,19 +509,32 @@ CerrarInscripcion_VIS
                 !______CerrarInscripcion_SP_32_TCASE
 \end{alltt}
 
-Los casos resaltados en rojo son aquellos que fueron podados, y en verde aquellos de los cuales resultó un caso de prueba generado.
+Los casos resaltados en rojo son aquellos que fueron podados al correr el comando \emph{genalltca}, y en verde aquellos de los cuales resultó un caso de prueba generado.
 
-Acá explicar por qué no generó para algunas hojas del árbol de prueba
+La mayoría de los casos fueron podados, para explicar los motivos primero se explica primero el por qué de los casos más sencillos:
 \begin{itemize}
-    \item La rama del caso \emph{CerrarInscripcion\_FT\_1} fue podada ya que fue generada por la táctica \emph{FT} dando el valor de inscripto a la variable \estado{estado?}, incumpliendo
-          la precondición $estado? \neq inscripto$
+    \item La rama del caso \emph{CerrarInscripcion\_FT\_1} fue podada ya que fue generada por la táctica \emph{FT} dando el valor de inscripto a la variable \emph{estado?}, incumpliendo la precondición $estado? \neq inscripto$ del esquema \emph{CerrarInscripcionOk}.
+    \item Los casos \emph{CerrarInscripcion\_FT\_29} y \emph{CerrarInscripcion\_FT\_30} son podados porque en estos casos se le asigna el valor \emph{promueve} o \emph{repite} a la variable \emph{estado?} incumpliendo la precondición $estado? = inscripto$ del esquema \emph{CerrarInscripcionEstadoInvalidoE}.
+\end{itemize}
+
+Luego, para los siguientes casos se deben analizar los casos de la partición estándar del operador \oplus:
+
+\begin{center}
+    \includegraphics[width=0.8\linewidth]{sp_oplus.png}
+\end{center}
+
+donde $R = inscripciones$ y $G = \{alumno? \mapsto ((inscripciones~alumno?).1, estado?)\}$. A partir de esto se puede llegar a las siguiente conclusiones:
+\begin{itemize}
+    \item Por la definición de $G$ este conjunto tendrá siempre un elemento, siendo este la tupla \\ $(alumno?, ((inscripciones~alumno?).1, estado?))$, por lo que nunca se podrá dar que $G = \{\}$ y esto descarta los casos \emph{CerrarInscripcion\_FT\_12}, \emph{CerrarInscripcion\_FT\_14}, \emph{CerrarInscripcion\_FT\_20} y \emph{CerrarInscripcion\_FT\_22}.
+    \item Otra consecuencia de que $G$ nunca podrá ser vacío es que dentro de su definición se consulta el valor asignado a $alumno?$ en la función $inscripciones$ lo que significa que $R \neq \{\}$, esto descarta los casos  \emph{CerrarInscripcion\_FT\_13} y \emph{CerrarInscripcion\_FT\_21}. Además otra consecuencia es que $alumno? \in \dom inscripciones$, esto implica $\dom G \subset \dom R \implies alumno? \in (\dom R \cap \dom G)$ y descarta los casos \emph{CerrarInscripcion\_FT\_17} y \emph{CerrarInscripcion\_FT\_25}.
+    \item Otro caso de la partición estándar se da con la condición $R \neq \{\}, G \neq \{\}, \dom R \subset \dom G$. Para que esto suceda debería existir $alumno \in ALUMNO$ tal que $alumno \in \dom G \land alumno \notin \dom R$, pero si $alumno \in \dom G$ entonces por lo visto en el ítem anterior se tiene que dar $alumno \in \dom R$ y finalmente $\dom R \subset \dom G$ es una contradicción. Esto descarta los casos \emph{CerrarInscripcion\_SP\_18} y \emph{CerrarInscripcion\_SP\_26}.
+    \item El último caso de la partición estándar viene dado por la condición $R \neq \{\}, G \neq \{\}, (\dom R \cap \dom G) \neq \{\}, \neg (\dom G \subseteq \dom R), \neg (\dom R \subseteq \dom G)$ y por los ítems anteriores sabemos que $\dom G \subset \dom R$ contradiciendo la condición. Esto descarta los casos \emph{CerrarInscripcion\_SP\_19} y \emph{CerrarInscripcion\_SP\_27}.
 \end{itemize}
 
 \subsubsection*{Esquemas de casos de pruebas generados}
 
 Por último, los casos de prueba generados fueron los siguientes:
 
-Este primer caso modifica el cierre de una inscripción desde una repitencia a una promoción para un alumno \emph{aLUMNO1}. Este caso es correcto.
 \begin{schema}{CerrarInscripcion\_ SP\_ 15\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 15 
 \where
@@ -531,7 +544,6 @@ Este primer caso modifica el cierre de una inscripción desde una repitencia a u
  alumno? = aLUMNO1
 \end{schema}
 
-Este caso realiza lo mismo que el anterior pero con la diferencia de que en la función de \emph{inscripciones} se encuentra en el dominio el alumno \emph{aLUMNO3} el cual no se encuentra dentro del conjunto {registrados}, incumpliendo con la invariante \emph{InscripcionesInv}.
 \begin{schema}{CerrarInscripcion\_ SP\_ 16\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 16 
 \where
@@ -541,7 +553,6 @@ Este caso realiza lo mismo que el anterior pero con la diferencia de que en la f
  alumno? = aLUMNO1
 \end{schema}
 
-Este caso modifica el cierre de una inscripción por el mismo estado que ya tenía, sigue siendo un caso válido y cumple con las invariantes.
 \begin{schema}{CerrarInscripcion\_ SP\_ 23\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 23 
 \where
@@ -551,7 +562,6 @@ Este caso modifica el cierre de una inscripción por el mismo estado que ya ten�
  alumno? = aLUMNO1
 \end{schema}
 
-Este caso es inválido ya que incumple la invariante \emph{InscripcionesInv}.
 \begin{schema}{CerrarInscripcion\_ SP\_ 24\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 24 
 \where
@@ -561,7 +571,6 @@ Este caso es inválido ya que incumple la invariante \emph{InscripcionesInv}.
  alumno? = aLUMNO1
 \end{schema}
 
-El siguiente caso es válido ya que entra en el caso de error \emph{CerrarInscripcionEstadoInvalidoE} pero también podría entrar en el caso de error \emph{CerrarInscripcionAlumnoNoEncontradoE}, por lo cual también vuelve a ser generado en el caso siguiente.
 \begin{schema}{CerrarInscripcion\_ FT\_ 28\_ TCASE}\\
  CerrarInscripcion\_ FT\_ 28 
 \where
@@ -570,7 +579,6 @@ El siguiente caso es válido ya que entra en el caso de error \emph{CerrarInscri
  estado? = inscripto \\
  alumno? = aLUMNO1
 \end{schema}
-
 
 \begin{schema}{CerrarInscripcion\_ SP\_ 31\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 31 
@@ -581,7 +589,6 @@ El siguiente caso es válido ya que entra en el caso de error \emph{CerrarInscri
  alumno? = aLUMNO1
 \end{schema}
 
-Este caso es incorrecto porque es generado como caso de prueba del esquema \emph{CerrarInscripcionAlumnoNoEncontradoE} pero incumple con la precondición $alumno? \notin registrados$.
 \begin{schema}{CerrarInscripcion\_ SP\_ 32\_ TCASE}\\
  CerrarInscripcion\_ SP\_ 32 
 \where
