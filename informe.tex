@@ -72,16 +72,18 @@ Un directivo desea inscribir o reinscribir a un alumno en su escuela. A cada alu
   \item \textbf{Repitente}: el alumno no cumplió los requisitos para promocionar de grado y debe ser inscripto en el mismo grado
 \end{itemize}
 
+Una inscripción con estado \textbf{Inscripto} es considerada una inscripción abierta, y una inscripción con estado \textbf{Promovido} o \textbf{Repitente} es considerada cerrada.
+
 Se deben especificar las siguientes operaciones:
 
 \begin{enumerate}
   \item \textbf{Inscribir alumno}: se registra por primera vez a un alumno y se lo inscribe a primer grado
   
-  \item \textbf{Reinscribir alumno}: se inscribe un alumno previamente registrado al grado que corresponda según su último estado de inscripción
+  \item \textbf{Reinscribir alumno}: un alumno con su inscripción actual cerrada es reinscripto en el curso que corresponda según el estado de cierre
   
   \item \textbf{Cerrar inscripción}: la inscripción actual es cerrada y se registra una promoción o repitencia
   
-  \item \textbf{Consultar graduado}: se desea consultar si un alumno se graduó
+  \item \textbf{Consultar graduado}: se desea consultar si un alumno en particular se graduó
 \end{enumerate}
 
 No se diferencia entre primaria y secundaria, registramos desde 1er grado hasta 12avo, el último del secundario. Los requisitos para promocionar de grado se encuentran por fuera del sistema y no deben ser tenidos en cuenta.
